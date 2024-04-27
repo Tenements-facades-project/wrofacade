@@ -1,3 +1,4 @@
 pytorch
 numpy
 opencv-python
+black
