@@ -1,3 +1,7 @@
+"""This module provides implementation of
+facade rectangular lattice
+"""
+
 from __future__ import annotations
 
 from typing import Literal

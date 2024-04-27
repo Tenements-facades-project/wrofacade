@@ -1,3 +1,8 @@
+"""This module provide functions for finding split lines
+on a facade image (and segmentation mask) that may be used
+to build the rectangular lattice of the facade
+"""
+
 from __future__ import annotations
 
 from typing import Any
