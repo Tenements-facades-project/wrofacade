@@ -1,2 +1,6 @@
 pytorch
 numpy
+opencv-python
+black
+matplotlib
+scikit-learn

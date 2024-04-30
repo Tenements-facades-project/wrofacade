@@ -35,7 +35,7 @@ class ImageTranslator(ABC):
         self.model_names = []
         self.optimizers = []
         self.metric = 0  # used for learning rate policy 'plateau'
-    
+
     @abstractmethod
     def forward(self):
         """Run forward pass"""
