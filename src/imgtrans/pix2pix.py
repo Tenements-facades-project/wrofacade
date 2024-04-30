@@ -17,7 +17,7 @@ class Pix2PixModel(ImageTranslator):
         """Initialize the pix2pix class.
 
         Parameters:
-            opt (Option class)-- stores all the experiment flags; needs to be a subclass of BaseOptions
+            opt (Option class) -- stores all the experiment flags
         """
         ImageTranslator.__init__(self, opt)
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
