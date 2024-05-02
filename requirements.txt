@@ -1,6 +1,7 @@
-pytorch
+torch
 numpy
 opencv-python
 black
 matplotlib
 scikit-learn
+treelib
