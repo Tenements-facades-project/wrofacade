@@ -19,18 +19,11 @@ class GeneralSymbol(ABC, ImgRange):
         name (str): name of the facade element represented
             by the symbol, or some string used to identify
             the symbol
-        label (int): an integer label assigned to the symbol and
-            used in the mask
-        mask_original (2D array): original pixels labels mask fragment
-            corresponding to the range of the input corresponding to
-            the symbol
     """
 
-    def __init__(self, img: np.ndarray, mask: np.ndarray, name: str, label: int):
+    def __init__(self, img: np.ndarray, mask: np.ndarray, name: str):
         self.name: str = name
-        self.label: int = label
-        self.mask_original = mask
-        super().__init__(img=img, mask=None)
+        super().__init__(img=img, mask=mask)
 
 
 class GeneralTerminal(GeneralSymbol):
@@ -39,20 +32,24 @@ class GeneralTerminal(GeneralSymbol):
 
     """
 
-    def __init__(self, img: np.ndarray, mask: np.ndarray, name: str, label: int):
-        super().__init__(img=img, mask=mask, name=name, label=label)
+    def __init__(self, img: np.ndarray, mask: np.ndarray, name: str):
+        super().__init__(img=img, mask=mask, name=name)
 
 
 class GeneralNonterminal(GeneralSymbol):
     """Base class for non-terminal symbols in general grammar,
     i.e. symbols that can be further parsed into a set
     of other symbols
+
+    Attributes:
+        lattice: Lattice object of the image area represented
+            by the nonterminal
     """
 
-    def __init__(self, lattice: Lattice, name: str, label: int):
+    def __init__(self, lattice: Lattice, name: str):
         self.lattice = lattice
         img, mask = self.lattice.assemble_lattice()
-        super().__init__(img=img, mask=mask, name=name, label=label)
+        super().__init__(img=img, mask=mask, name=name)
 
     @abstractmethod
     def possible_splits(self) -> list[tuple[GeneralNonterminal, ...] | GeneralTerminal]:
@@ -93,16 +90,15 @@ class OtherNonterminal(GeneralNonterminal):
     def __init__(
         self,
         lattice: Lattice,
-        serial_number: int,
+        name: str,
         split_direction: Literal["horizontal", "vertical"],
     ):
         super().__init__(
-            lattice=lattice, name=f"other_{serial_number}", label=serial_number
+            lattice=lattice, name=name,
         )
         if split_direction not in ("horizontal", "vertical"):
             raise ValueError(f"Invalid split_direction: {split_direction}")
         self.split_direction = split_direction
-        self.serial_number = serial_number
 
     def possible_splits(self) -> list[tuple[GeneralNonterminal, ...] | GeneralTerminal]:
         shape = self.lattice.ranges.shape
@@ -111,13 +107,12 @@ class OtherNonterminal(GeneralNonterminal):
             return [
                 GeneralTerminal(
                     img=self.img,
-                    mask=self.mask_original,
-                    name=self.name,
-                    label=self.label,
+                    mask=self.mask,
+                    name=self.name + 'T',
                 )
             ]
 
-        new_serial_numbers = [int(f"{self.serial_number}{i}") for i in range(2)]
+        new_names = [f"{self.name}{i}" for i in range(2)]
         if self.split_direction == "horizontal":
             if shape[0] == 1:
                 self_copy = deepcopy(self)
@@ -125,12 +120,12 @@ class OtherNonterminal(GeneralNonterminal):
                 return [(self_copy,)]
             first = OtherNonterminal(
                 lattice=self.lattice[0, :],
-                serial_number=new_serial_numbers[0],
+                name=new_names[0],
                 split_direction="vertical",
             )
             rest = OtherNonterminal(
                 lattice=self.lattice[1:, :],
-                serial_number=new_serial_numbers[1],
+                name=new_names[1],
                 split_direction="vertical",
             )
         else:
@@ -140,12 +135,12 @@ class OtherNonterminal(GeneralNonterminal):
                 return [(self_copy,)]
             first = OtherNonterminal(
                 lattice=self.lattice[:, 0],
-                serial_number=new_serial_numbers[0],
+                name=new_names[0],
                 split_direction="horizontal",
             )
             rest = OtherNonterminal(
                 lattice=self.lattice[:, 1:],
-                serial_number=new_serial_numbers[1],
+                name=new_names[1],
                 split_direction="horizontal",
             )
         return [(first, rest)]
@@ -156,7 +151,7 @@ class Floor(GeneralNonterminal):
 
     It splits along vertical split lines. The lines to split are chosen
     by checking which lattice columns contain tiles of class `window`
-    (or some other that indicate there's a window), but the rule is designed
+    (or some other that indicates there's a window), but the rule is designed
     so that no window is adjacent to more than one split line
     (i.e. the goal is: one window -> one segment)
 
@@ -165,35 +160,48 @@ class Floor(GeneralNonterminal):
 
     """
 
-    def __init__(self, lattice: Lattice, window_labels: Iterable[int] = (8, 3)):
-        super().__init__(lattice=lattice, name="Floor", label=10)
+    def __init__(self, lattice: Lattice, window_labels: Iterable[int]):
+        super().__init__(lattice=lattice, name="Floor")
         self.window_labels: Iterable[int] = window_labels
 
     def possible_splits(self) -> list[tuple[GeneralNonterminal, ...] | GeneralTerminal]:
-        lattice_mv = self.lattice.label_major_vote()
+
+        # find split lines that are adjacent to windows
+        # but no window is adjacent to more than one split line
         split_inds = []
         flag = False
-        for i, col in enumerate(lattice_mv.ranges.transpose()):
-            major_labels = [rng.most_freqent_label() for rng in col]
+        for i, col in enumerate(self.lattice.ranges.transpose()):
+            # get list of class labels present in the current column
+            major_labels = [rng.most_frequent_label() for rng in col]
             if flag:
+                # previous column contained window - don't consider this column
+                # but if there's no windows in this column, reset flag
                 if all((label not in major_labels) for label in self.window_labels):
                     flag = False
                 continue
             if any((label in major_labels) for label in self.window_labels):
+                # window in current column - add split line
                 split_inds.append(i)
                 flag = True
+
         nonterminals = []
+
+        # add 0 and (number_of_columns) to split inds
+        # (i.e. beginning of the first and end of the last)
         if 0 not in split_inds:
             split_inds = [0] + split_inds
-        split_inds = split_inds + [len(lattice_mv.ranges.transpose())]
+        split_inds = split_inds + [len(self.lattice.ranges.transpose())]
+
+        # add nonterminals to the list
         for left_ind, right_ind in zip(split_inds[:-1], split_inds[1:]):
             nonterminals.append(
                 OtherNonterminal(
                     lattice=self.lattice[:, left_ind:right_ind],
-                    serial_number=100 + left_ind,
+                    name='FloorPart',
                     split_direction="horizontal",
                 )
             )
+
         return [tuple(nonterminals)]
 
 
@@ -207,30 +215,40 @@ class GroundFloor(GeneralNonterminal):
     """
 
     def __init__(self, lattice: Lattice, min_n_splits: int, max_n_splits: int):
-        super().__init__(lattice=lattice, name="GroundFloor", label=9)
+        super().__init__(lattice=lattice, name="GroundFloor")
         self.min_n_splits = min_n_splits
         self.max_n_splits = max_n_splits
 
     def possible_splits(self) -> list[tuple[GeneralNonterminal, ...] | GeneralTerminal]:
+
+        #
         possible_splits = []
         for n_splits in range(self.min_n_splits, self.max_n_splits + 1):
+
+            # get `n_splits` strongest split lines
             split_inds = self.lattice.n_strongest_splits(
                 n=n_splits, split_direction="vertical"
             )
             split_inds.sort()
+
+            # add 0 and (number_of_columns) to split inds
+            # (i.e. beginning of the first and end of the last)
             if 0 not in split_inds:
                 split_inds = [0] + split_inds
             split_inds = split_inds + [len(self.lattice.ranges.transpose())]
+
+            # obtain nonterminals and add possible split to the list
             nonterminals = []
             for left_ind, right_ind in zip(split_inds[:-1], split_inds[1:]):
                 nonterminals.append(
                     OtherNonterminal(
                         lattice=self.lattice[:, left_ind:right_ind],
-                        serial_number=100 + left_ind,
+                        name='GroundFloorPart',
                         split_direction="horizontal",
                     )
                 )
             possible_splits.append(tuple(nonterminals))
+
         return possible_splits
 
 
@@ -258,26 +276,33 @@ class Facade(GeneralNonterminal):
 
     def __init__(
         self, lattice: Lattice, max_ground_floor: float, n_possible_splits: int,
-        window_labels: Iterable[int] = (8, 3)
+        window_labels: Iterable[int]
     ):
-        super().__init__(lattice=lattice, name="Facade", label=0)
+        super().__init__(lattice=lattice, name="Facade")
         self.max_ground_floor = max_ground_floor
         self.n_possible_splits = n_possible_splits
         self.window_labels: Iterable[int] = window_labels
 
     def possible_splits(self) -> list[tuple[GeneralNonterminal, ...] | GeneralTerminal]:
-        # extract split indexes at windows
+
+        # find split lines that are adjacent to windows
+        # but no window is adjacent to more than one split line
         windows_split_inds = []
         flag = False
         for i, row in enumerate(self.lattice.ranges):
-            major_labels = [rng.most_freqent_label() for rng in row]
+            # get list of class labels present in the current row
+            major_labels = [rng.most_frequent_label() for rng in row]
             if flag:
+                # previous row contained window - don't consider this row
+                # but if there's no windows in this row, reset flag
                 if all((label not in major_labels) for label in self.window_labels):
                     flag = False
                 continue
             if any((label in major_labels) for label in self.window_labels):
+                # window in current row - add split line
                 windows_split_inds.append(i)
                 flag = True
+
         # extract possible floors - ground floor splits
         rows_lens = [row[0].img.shape[0] for row in self.lattice.ranges]
         cum_row_parts = np.cumsum(rows_lens) / np.sum(rows_lens)
@@ -288,6 +313,7 @@ class Facade(GeneralNonterminal):
         possible_gf_split_inds = [ind + floors_offset for ind in possible_gf_split_inds]
 
         possible_splits = []
+        # add possible split for each ground floor possible split ind
         for gf_split_ind in possible_gf_split_inds:
             nonterminals = []
             rel_windows_split_inds = [
@@ -297,7 +323,7 @@ class Facade(GeneralNonterminal):
                 nonterminals.append(
                     OtherNonterminal(
                         lattice=self.lattice[: rel_windows_split_inds[0], :],
-                        serial_number=50,
+                        name="UpPart",
                         split_direction="vertical",
                     )
                 )
@@ -318,6 +344,7 @@ class Facade(GeneralNonterminal):
                 )
             )
             possible_splits.append(tuple(nonterminals))
+
         return possible_splits
 
 
@@ -325,7 +352,7 @@ def split_leaves(tree: Tree) -> list[Tree]:
     """Given a parse tree of a facade with general symbols,
     extracts all possible splits from the tree's leaves
     that are nonterminals and creates new trees, each tree
-    representing a possible set of nonterminals split
+    representing a possible split case
     (i.e. nonterminals leaves are not leaves anymore as they
     were split and have children symbols).
     The list of all possible trees is returned
@@ -365,6 +392,10 @@ def split_leaves(tree: Tree) -> list[Tree]:
 
 
 def is_tree_complete(tree: Tree) -> bool:
+    """Returns True if the tree is complete, i.e.
+    there is no leaf that is nonterminal and could
+    be split
+    """
     return not any(
         [isinstance(leaf.data, GeneralNonterminal) for leaf in tree.leaves()]
     )
@@ -405,82 +436,6 @@ def parse_facade(
     return trees_new
 
 
-def add_symbol_lines(
-    parse_img,
-    parse_tree,
-    left_bound,
-    right_bound,
-    up_bound,
-    down_bound,
-    split_direction,
-    line_width=3,
-) -> np.ndarray:
-    """Function aimed at visualization; creates a copy
-    of given facade image and adds bounding boxes of symbols
-    from the parse tree recursively
-
-    """
-    parse_img = parse_img.copy()
-
-    box_interior = parse_img[
-        up_bound + line_width : down_bound - line_width,
-        left_bound + line_width : right_bound - line_width,
-    ].copy()
-    parse_img[up_bound:down_bound, left_bound:right_bound] = [0, 0, 255]
-    parse_img[
-        up_bound + line_width : down_bound - line_width,
-        left_bound + line_width : right_bound - line_width,
-    ] = box_interior
-
-    start_ind = 0
-    if split_direction == "horizontal":
-        for root_child in parse_tree.children(parse_tree.root):
-            height = root_child.data.img.shape[0]
-            parse_img = add_symbol_lines(
-                parse_img,
-                parse_tree.subtree(root_child.identifier),
-                left_bound,
-                right_bound,
-                up_bound + start_ind,
-                down_bound + start_ind + height,
-                "vertical",
-            )
-            start_ind += height
-    else:
-        for root_child in parse_tree.children(parse_tree.root):
-            width = root_child.data.img.shape[1]
-            parse_img = add_symbol_lines(
-                parse_img,
-                parse_tree.subtree(root_child.identifier),
-                left_bound + start_ind,
-                right_bound + start_ind + width,
-                up_bound,
-                down_bound,
-                split_direction="horizontal",
-            )
-            start_ind += width
-    return parse_img
-
-
-def visualize_tree_symbols(tree):
-    """Visualizes a general symbols
-    parse tree on the image of the facade
-    """
-    parse_img = tree.get_node("0").data.img
-    parse_img = add_symbol_lines(
-        parse_img,
-        tree,
-        0,
-        parse_img.shape[1] - 1,
-        0,
-        parse_img.shape[0] - 1,
-        "horizontal",
-    )
-    fig, ax = plt.subplots(figsize=(6, 6))
-    ax.imshow(parse_img[:, :, ::-1])
-    plt.show()
-
-
 def symbol_name_loss(symbols: list[GeneralNonterminal]) -> float:
     """Computes loss value for a list of general nonterminal
     symbols that are assumed to have similar dimensions
@@ -496,7 +451,7 @@ def symbol_name_loss(symbols: list[GeneralNonterminal]) -> float:
 
 def get_symbols_dict(tree: Tree) -> dict[str, list[GeneralNonterminal]]:
     """Creates dictionary from the tree of general symbols,
-    where keys are symbols names and values are list of nonterminals with the name
+    where keys are symbols names and values are lists of nonterminals with the name
     that occurred in the tree
     """
     symbols_dict = {}
