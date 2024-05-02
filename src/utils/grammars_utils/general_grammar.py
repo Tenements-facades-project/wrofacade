@@ -98,7 +98,8 @@ class OtherNonterminal(GeneralNonterminal):
         split_direction: Literal["horizontal", "vertical"],
     ):
         super().__init__(
-            lattice=lattice, name=name,
+            lattice=lattice,
+            name=name,
         )
         if split_direction not in ("horizontal", "vertical"):
             raise ValueError(f"Invalid split_direction: {split_direction}")
@@ -112,7 +113,7 @@ class OtherNonterminal(GeneralNonterminal):
                 GeneralTerminal(
                     img=self.img,
                     mask=self.mask,
-                    name=self.name + 'T',
+                    name=self.name + "T",
                 )
             ]
 
@@ -201,7 +202,7 @@ class Floor(GeneralNonterminal):
             nonterminals.append(
                 OtherNonterminal(
                     lattice=self.lattice[:, left_ind:right_ind],
-                    name='FloorPart',
+                    name="FloorPart",
                     split_direction="horizontal",
                 )
             )
@@ -247,7 +248,7 @@ class GroundFloor(GeneralNonterminal):
                 nonterminals.append(
                     OtherNonterminal(
                         lattice=self.lattice[:, left_ind:right_ind],
-                        name='GroundFloorPart',
+                        name="GroundFloorPart",
                         split_direction="horizontal",
                     )
                 )
@@ -279,8 +280,11 @@ class Facade(GeneralNonterminal):
     """
 
     def __init__(
-        self, lattice: Lattice, max_ground_floor: float, n_possible_splits: int,
-        window_labels: Iterable[int]
+        self,
+        lattice: Lattice,
+        max_ground_floor: float,
+        n_possible_splits: int,
+        window_labels: Iterable[int],
     ):
         super().__init__(lattice=lattice, name="Facade")
         self.max_ground_floor = max_ground_floor
@@ -337,7 +341,8 @@ class Facade(GeneralNonterminal):
             ):
                 nonterminals.append(
                     Floor(
-                        lattice=self.lattice[up_ind:down_ind, :], window_labels=self.window_labels
+                        lattice=self.lattice[up_ind:down_ind, :],
+                        window_labels=self.window_labels,
                     )
                 )
             nonterminals.append(
