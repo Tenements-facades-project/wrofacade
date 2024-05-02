@@ -1,3 +1,8 @@
+"""This module provides general grammar tools,
+i.e. tools to create a parse tree from a rectangular
+facade's lattice
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -5,7 +10,6 @@ from copy import deepcopy
 from typing import Literal, Iterable
 from itertools import product
 import numpy as np
-import matplotlib.pyplot as plt
 from treelib import Tree
 
 from ..lattice_utils.lattice import ImgRange, Lattice
