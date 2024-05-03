@@ -328,7 +328,7 @@ class Facade(GeneralNonterminal):
                 ind for ind in windows_split_inds if ind < gf_split_ind
             ]
             if not rel_windows_split_inds:
-                # ground floor is to high - no windows detected above
+                # ground floor is too high - no windows detected above
                 continue
             if rel_windows_split_inds[0] != 0:
                 nonterminals.append(
