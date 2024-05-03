@@ -485,6 +485,6 @@ def get_tree_loss(tree: Tree) -> float:
     to have similar dimensions)
     """
     symbols_dict = get_symbols_dict(tree)
-    return np.mean(
+    return np.nanmean(
         [symbol_name_loss(symbols_list) for symbols_list in symbols_dict.values()]
     )
