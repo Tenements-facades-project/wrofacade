@@ -4,6 +4,7 @@ from collections import OrderedDict
 import torch
 
 from utils.imgtrans_utils import networks
+from utils.imgtrans_utils.image_processing import img_to_tensor, tensor_to_img
 from img_translator import ImageTranslator
 # from image_processing import img_to_tensor, tensor_to_img
 
@@ -30,18 +31,18 @@ class Pix2PixModel(ImageTranslator):
         else:  # during test time, only load G
             self.model_names = ['G']
         # define networks (both generator and discriminator)
-        self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.device)
+        self.netG = networks.define_G(opt.translator.input_nc, opt.translator.output_nc, opt.translator.ngf, opt.translator.netG, opt.translator.norm,
+                                      not opt.translator.no_dropout, opt.translator.init_type, opt.translator.init_gain, self.device)
 
         if self.isTrain:  # define a discriminator
-            self.netD = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
-                                          opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.device)
+            self.netD = networks.define_D(opt.translator.input_nc + opt.translator.output_nc, opt.translator.ndf, opt.translator.netD,
+                                          opt.translator.n_layers_D, opt.translator.norm, opt.translator.init_type, opt.translator.init_gain, self.device)
             # define loss functions
-            self.criterionGAN = networks.GANLoss(opt.gan_mode).to(self.device)
+            self.criterionGAN = networks.GANLoss(opt.translator.gan_mode).to(self.device)
             self.criterionL1 = torch.nn.L1Loss().to(self.device)
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
-            self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
-            self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+            self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.translator.lr, betas=(opt.translator.beta1, 0.999))
+            self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.translator.lr, betas=(opt.translator.beta1, 0.999))
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D)
 
@@ -53,7 +54,7 @@ class Pix2PixModel(ImageTranslator):
 
         The option 'direction' can be used to swap images in domain A and domain B.
         """
-        AtoB = self.opt.direction == 'AtoB'
+        AtoB = self.opt.translator.direction == 'AtoB'
         self.real_A = (input[0] if AtoB else input[1]).to(self.device)
         self.real_B = (input[1] if AtoB else input[0]).to(self.device)
 
@@ -83,7 +84,7 @@ class Pix2PixModel(ImageTranslator):
         pred_fake = self.netD(fake_AB)
         self.loss_G_GAN = self.criterionGAN(pred_fake, True)
         # Second, G(A) = B
-        self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_L1
+        self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.translator.lambda_L1
         # combine loss and calculate gradients
         self.loss_G = self.loss_G_GAN + self.loss_G_L1
         self.loss_G.backward()
@@ -101,4 +102,16 @@ class Pix2PixModel(ImageTranslator):
         self.backward_G()                   # calculate graidents for G
         self.optimizer_G.step()             # update G's weights
 
-    
+    def generate_image(self, img):
+        """Generates fake image given a tensor
+        Parameters:
+            img (PIL.Image) -- image to translate 
+        """
+        # converting image to tensor
+        img = img_to_tensor(img)
+        img = img.unsqueeze(0)
+        # generating new image
+        fake_image = self.netG(img.to(self.device))
+        out = tensor_to_img(fake_image)
+        out.to(self.device)
+        return out

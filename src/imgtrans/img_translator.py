@@ -26,10 +26,10 @@ class ImageTranslator(ABC):
             -- self.optimizers (optimizer list):    define and initialize optimizers. You can define one optimizer for each network. If two networks are updated at the same time, you can use itertools.chain to group them. See cycle_gan_model.py for an example.
         """
         self.opt = opt
-        self.isTrain = opt.isTrain
-        self.device = torch.device('cuda:{}'.format(self.gpu_ids[0])) if self.gpu_ids else torch.device('cpu')  # get device name: CPU or GPU
-        self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)  # save all the checkpoints to save_dir
-        if opt.preprocess != 'scale_width':  # with [scale_width], input images might have different sizes, which hurts the performance of cudnn.benchmark.
+        self.isTrain = opt.translator.isTrain
+        self.device = torch.device(f"{opt.device}" if opt.device in ['cpu', 'cuda', 'mps'] else 'cpu')
+        self.save_dir = os.path.join(opt.checkpoints_dir)  # save all the checkpoints to save_dir
+        if opt.translator.preprocess != 'scale_width':  # with [scale_width], input images might have different sizes, which hurts the performance of cudnn.benchmark.
             torch.backends.cudnn.benchmark = True
         self.loss_names = []
         self.model_names = []
@@ -55,6 +55,14 @@ class ImageTranslator(ABC):
         """Calculate losses, gradients, and update network weights; called in every training iteration"""
         pass
 
+    @abstractmethod
+    def pass_image(self, img):
+        """Generates fake image given a tensor
+        Parameters:
+            img (PIL.Image) -- image to translate 
+        """
+        pass
+
     def setup(self, opt):
         """Load and print networks; create schedulers
 
@@ -63,10 +71,10 @@ class ImageTranslator(ABC):
         """
         if self.isTrain:
             self.schedulers = [networks.get_scheduler(optimizer, opt) for optimizer in self.optimizers]
-        if not self.isTrain or opt.continue_train:
-            load_suffix = 'iter_%d' % opt.load_iter if opt.load_iter > 0 else opt.epoch
+        if not self.isTrain or opt.translator.continue_train:
+            load_suffix = 'iter_%d' % opt.translator.load_iter if opt.translator.load_iter > 0 else opt.translator.epoch
             self.load_networks(load_suffix)
-        self.print_networks(opt.verbose)
+        self.print_networks(opt.translator.verbose)
 
     def eval(self):
         """Make models eval mode during test time"""
@@ -88,7 +96,7 @@ class ImageTranslator(ABC):
         """Update learning rates for all the networks; called at the end of every epoch"""
         old_lr = self.optimizers[0].param_groups[0]['lr']
         for scheduler in self.schedulers:
-            if self.opt.lr_policy == 'plateau':
+            if self.opt.translator.lr_policy == 'plateau':
                 scheduler.step(self.metric)
             else:
                 scheduler.step()
