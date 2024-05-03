@@ -102,7 +102,7 @@ class Pix2PixModel(ImageTranslator):
         self.backward_G()                   # calculate graidents for G
         self.optimizer_G.step()             # update G's weights
 
-    def generate_image(self, img):
+    def pass_image(self, img):
         """Generates fake image given a tensor
         Parameters:
             img (PIL.Image) -- image to translate 
