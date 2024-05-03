@@ -1,7 +1,18 @@
 import yaml
 
+"""Usage of the parameters:
+In your file, insert the line:
+from config.hparam import hparam as hp
 
-def load_hparam(filename):
+Then access values using dot notation, e.g. device = hp.device 
+Example with nested values: gan_mode =  hp.translator.gan_mode 
+"""
+
+def load_hparam(filename:str) -> dict:
+    """Function to load the config.yaml file and its parameters
+    Args:
+        Filename (str) -- path to config file
+    """
     stream = open(filename, 'r')
     docs = yaml.load_all(stream, Loader=yaml.FullLoader)
     hparam_dict = dict()
@@ -9,17 +20,6 @@ def load_hparam(filename):
         for k, v in doc.items():
             hparam_dict[k] = v
     return hparam_dict
-
-
-def merge_dict(user, default):
-    if isinstance(user, dict) and isinstance(default, dict):
-        for k, v in default.items():
-            if k not in user:
-                user[k] = v
-            else:
-                user[k] = merge_dict(user[k], v)
-    return user
-
 
 class Dotdict(dict):
     """
@@ -42,7 +42,10 @@ class Dotdict(dict):
 
 
 class Hparam(Dotdict):
-
+    """Class storing all parameters used in the pipeline
+    Args:
+        file (str) -- path to config.yaml file
+    """
     def __init__(self, file='src/config/config.yaml'):
         super(Dotdict, self).__init__()
         hp_dict = load_hparam(file)

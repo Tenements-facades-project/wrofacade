@@ -17,7 +17,7 @@ translator:
   init_gain: 0.02 # scaling factor for normal, xavier and orthogonal.
   no_dropout: True # no dropout for the generator
   save_by_iter: True # whether saves model by iteration
-  load_epoch: 200 # which epoch to load
+  load_epoch: 200 # which epoch to load model from when generating images
   # dataset parameters
   dataset: 'wro' # chooses dataset to load [cmp | wro]
   load_size: 286 # scale images to this size
@@ -27,7 +27,7 @@ translator:
   # training parameters
   root_path: '/data/' # path to images (should have subfolders trainA, trainB, valA, valB, etc)
   n_epochs: 100 # number of epochs
-  n_epochs_decay: 100, help='# of iter to linearly decay learning rate to zero')
+  n_epochs_decay: 100 # no of iter to linearly decay learning rate to zero
   batch_size: 4 # training batch size
   test_batch_size: 1 #  testing batch size
   continue_train: False # continue from checkpoint

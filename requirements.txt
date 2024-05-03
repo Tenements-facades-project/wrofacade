@@ -6,3 +6,4 @@ black
 matplotlib
 scikit-learn
 pillow
+PyYAML
