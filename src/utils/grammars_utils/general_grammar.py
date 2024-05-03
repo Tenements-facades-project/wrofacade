@@ -226,7 +226,7 @@ class GroundFloor(GeneralNonterminal):
 
     def possible_splits(self) -> list[tuple[GeneralNonterminal, ...] | GeneralTerminal]:
 
-        #
+        # add possible split result for each number of splits in desired range
         possible_splits = []
         for n_splits in range(self.min_n_splits, self.max_n_splits + 1):
 
