@@ -1,0 +1,52 @@
+checkpoints_dir: 'utils/checkpoints' # models are stored here
+device: 'cpu' # [cpu | cuda | mps]
+
+---
+translator:
+  isTrain: False # set training mode
+  gan_mode: 'vanilla' # the type of GAN objective, supports vanilla, lsgan, and wgangp
+  input_nc: 3 # no. of input image channels: 3 for RGB and 1 for grayscale
+  output_nc: 3 # no. of output image channels: 3 for RGB and 1 for grayscale
+  ngf: 64 # no. of gen filters in the last conv layer
+  ndf: 64 # no. of discrim filters in the first conv layer
+  netD: 'basic' # specify discriminator architecture [basic | n_layers | pixel]. The basic model is a 70x70 PatchGAN. n_layers allows you to specify the layers in the discriminator
+  netG: 'unet_256' # specify generator architecture [resnet_9blocks | resnet_6blocks | unet_256 | unet_128]
+  n_layers_D: 3 # only used if netD==n_layers
+  norm: 'batch' # instance normalization or batch normalization [instance | batch | none]
+  init_type: 'normal' # network initialization [normal | xavier | kaiming | orthogonal]
+  init_gain: 0.02 # scaling factor for normal, xavier and orthogonal.
+  no_dropout: True # no dropout for the generator
+  save_by_iter: True # whether saves model by iteration
+  load_epoch: 200 # which epoch to load model from when generating images
+  # dataset parameters
+  dataset: 'wro' # chooses dataset to load [cmp | wro]
+  load_size: 286 # scale images to this size
+  crop_size: 256 # then crop to this size
+  preprocess: 'resize_and_crop' # scaling and cropping of images at load time [resize_and_crop | crop | scale_width | scale_width_and_crop | none]
+  no_flip: True # if specified, do not flip the images for data augmentation
+  # training parameters
+  root_path: '/data/' # path to images (should have subfolders trainA, trainB, valA, valB, etc)
+  n_epochs: 100 # number of epochs
+  n_epochs_decay: 100 # no of iter to linearly decay learning rate to zero
+  batch_size: 4 # training batch size
+  test_batch_size: 1 #  testing batch size
+  continue_train: False # continue from checkpoint
+  epoch_count: 1 # the starting epoch count
+  niter: 100 # no of iter at starting learning rate
+  niter_decay: 100 # no of iter to linearly decay learning rate to zero
+  lr: 0.0003 # initial learning rate for adam
+  lr_polic: 'linear' # earning rate policy [linear|step|plateau|cosine]
+  lr_decay_iters: 50 # multiply by a gamma every lr_decay_iters iterations
+  beta1: 0.5 # beta1 for adam
+  threads: 4 # number of threads for data loader to use
+  seed: 123 #  random seed to use
+  lambda_L1: 100 # weight on L1 term in objective
+  print_freq: 10 # frequency of printing training stats
+  save_latest_freq: 5000 # frequency of saving the latest results
+  save_epoch_freq: 5 # frequency of saving checkpoints at the end of epochs
+
+---
+segmentator:
+  
+  
+    

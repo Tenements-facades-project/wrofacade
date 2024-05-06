@@ -1,7 +1,10 @@
-pytorch
+torch
+torchvision
 numpy
 opencv-python
 black
 matplotlib
 scikit-learn
+pillow
+PyYAML
 transformers
