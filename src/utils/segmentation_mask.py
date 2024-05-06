@@ -6,7 +6,7 @@ class SegmentationMask:
     """Class containing segmentation mask and class info
     Args:
         mask_img -- grayscale PIL.Image 
-        label2clr -- dictionary containing class labels and colours, key's positional index
+        label2clr -- dictionary containing class labels and colours, keys' positional index
                      in the dict corresponds to the class id, e.g. {'window': [255,244,233]}
     """
     def __init__(self, 
