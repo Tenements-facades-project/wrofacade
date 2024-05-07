@@ -15,13 +15,13 @@ from treelib import Tree
 from ..lattice_utils.lattice import ImgRange, Lattice
 
 
-class GeneralSymbol(ABC, ImgRange):
-    """Base class for all general grammar symbols
-    (i.e. elements of facades' lattices' parse trees)
+class GeneralTerminal(ImgRange):
+    """Base class for terminal symbols in general grammar,
+    i.e. symbols that do not undergo further division
 
     Attributes:
         name (str): name of the facade element represented
-            by the symbol, or some string used to identify
+            by the terminal, or some string used to identify
             the symbol
     """
 
@@ -30,17 +30,7 @@ class GeneralSymbol(ABC, ImgRange):
         super().__init__(img=img, mask=mask)
 
 
-class GeneralTerminal(GeneralSymbol):
-    """Base class for terminal symbols in general grammar,
-    i.e. symbols that do not undergo further division
-
-    """
-
-    def __init__(self, img: np.ndarray, mask: np.ndarray, name: str):
-        super().__init__(img=img, mask=mask, name=name)
-
-
-class GeneralNonterminal(GeneralSymbol):
+class GeneralNonterminal(ABC, ImgRange):
     """Base class for non-terminal symbols in general grammar,
     i.e. symbols that can be further parsed into a set
     of other symbols
@@ -48,12 +38,16 @@ class GeneralNonterminal(GeneralSymbol):
     Attributes:
         lattice: Lattice object of the image area represented
             by the nonterminal
+        name (str): name of the facade part represented
+            by the nonterminal, or some string used to identify
+            the symbol
     """
 
     def __init__(self, lattice: Lattice, name: str):
         self.lattice = lattice
+        self.name = name
         img, mask = self.lattice.assemble_lattice()
-        super().__init__(img=img, mask=mask, name=name)
+        super().__init__(img=img, mask=mask)
 
     @abstractmethod
     def possible_splits(self) -> list[tuple[GeneralNonterminal, ...] | GeneralTerminal]:
