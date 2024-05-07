@@ -5,6 +5,7 @@ opencv-python
 black
 matplotlib
 scikit-learn
+treelib
 pillow
 PyYAML
 transformers
