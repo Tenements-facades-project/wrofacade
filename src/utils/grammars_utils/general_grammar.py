@@ -67,6 +67,10 @@ class GeneralNonterminal(ABC, ImgRange):
         pass
 
 
+# for type hints
+GeneralSymbol = GeneralTerminal | GeneralNonterminal
+
+
 class OtherNonterminal(GeneralNonterminal):
     """Universal general nonterminal (i.e. it can be applied
     to any lattice, no matter what facade part it represents)
