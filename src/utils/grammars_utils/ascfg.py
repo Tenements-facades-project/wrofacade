@@ -579,7 +579,9 @@ class Grammar:
                 terminal_id = uuid.uuid4()
                 parent_gen_symbol = tree.get_node(parent_identifier).data
                 terminal = Terminal(
-                    ImgRange(img=parent_gen_symbol.img, mask=parent_gen_symbol.mask)
+                    ImgRange(
+                        img=parent_gen_symbol.img, mask=parent_gen_symbol.mask
+                    )
                 )
                 terminals[terminal_id] = terminal
                 rules.append(
@@ -679,73 +681,33 @@ class Grammar:
 
         return parse_tree
 
-    def merge_nonterminals(
-        self, nonterm_1_id: UUID, nonterm_2_id: UUID, new_nonterm_id: UUID | None = None
-    ) -> Grammar:
+    def merge_nonterminals(self, nonterm_1_id: UUID, nonterm_2_id: UUID, new_nonterm_id: UUID | None = None) -> Grammar:
 
-        # get reachable labels (must be same for both nonterminals)
         reachable_labels = self.nonterminals[nonterm_1_id].reachable_labels
         if reachable_labels != self.nonterminals[nonterm_2_id].reachable_labels:
             raise ValueError("Nonterminals not label-compatible")
-
-        # get copy of rules df and nonterminals dict
-        new_rules_df = deepcopy(self.rules_df)
-        new_nonterminals = self.nonterminals.copy()
-
-        # update new nonterminals dict (remove merged IDs and add new ID)
+        rules = deepcopy(self.rules_df.rules.tolist())
+        nonterminals = self.nonterminals.copy()
         for nt_id in (nonterm_1_id, nonterm_2_id):
-            new_nonterminals.pop(nt_id)
+            nonterminals.pop(nt_id)
+            for rule in rules:
+                if rule.lhs == nt_id:
+                    rule.lhs = new_nonterm_id
+                if rule.rule_type == 'split':
+                    if nt_id in rule.rhs:
+                        rhs = list(rule.rhs)
+                        rhs = [new_nonterm_id if symbol_id == nt_id else symbol_id for symbol_id in
+                               rhs]
+                        rule.rhs = tuple(rhs)
+                else:
+                    if nt_id == rule.rhs:
+                        rule.rhs = new_nonterm_id
         new_nonterm = Nonterminal(reachable_labels=reachable_labels)
-        new_nonterminals[new_nonterm_id] = new_nonterm
-
-        # get indices in df where lhs is one of nonterms
-        replace_lhs_inds = new_rules_df["lhs"].isin([nonterm_1_id, nonterm_2_id])
-        new_rules_df.loc[replace_lhs_inds, "lhs"] = new_nonterm_id
-
-        # get indices in df where one of nonterms is in rhs
-        replace_rhs_inds = new_rules_df.apply(
-            lambda x: x.loc["rule_type"] == "split"
-            and (nonterm_1_id in x.loc["rhs"] or nonterm_2_id in x.loc["rhs"]),
-            axis=1,
-        )
-        new_rules_df.loc[replace_rhs_inds, "rhs"] = new_rules_df[replace_rhs_inds][
-            "rhs"
-        ].apply(
-            lambda x: tuple(
-                nt_id if nt_id not in (nonterm_1_id, nonterm_2_id) else new_nonterm_id
-                for nt_id in x
-            )
-        )
-
-        # get indices of split rules: X -> [X] (they should be removed)
-        inds_to_remove = new_rules_df.apply(
-            lambda x: x.loc["lhs"] == new_nonterm_id
-            and x.loc["rhs"] == (new_nonterm_id,),
-            axis=1,
-        )
-        new_rules_df = new_rules_df[~inds_to_remove]
-
-        # get new rules list
-        split_rules_inds = new_rules_df["rule_type"] == "split"
-        new_rules = (
-            new_rules_df[~split_rules_inds]["rules"].tolist()
-            + new_rules_df[split_rules_inds]
-            .apply(
-                lambda x: ProductionRule(
-                    split_direction=x.loc["split_direction"],
-                    rule_type="split",
-                    lhs=x.loc["lhs"],
-                    rhs=x.loc["rhs"],
-                    attributes=x.loc["rules"].attributes,
-                    attributes_probs=x.loc["rules"].attributes_probs,
-                ),
-                axis=1,
-            )
-            .tolist()
-        )
-
+        nonterminals[new_nonterm_id] = new_nonterm
         return Grammar(
-            terminals=self.terminals, nonterminals=new_nonterminals, rules=new_rules
+            terminals=self.terminals,
+            nonterminals=nonterminals,
+            rules=rules
         )
 
 
