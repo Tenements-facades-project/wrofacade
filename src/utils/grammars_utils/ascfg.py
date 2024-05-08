@@ -680,8 +680,22 @@ class Grammar:
         return parse_tree
 
     def merge_nonterminals(
-        self, nonterm_1_id: UUID, nonterm_2_id: UUID, new_nonterm_id: UUID | None = None
+        self, nonterm_1_id: UUID, nonterm_2_id: UUID, new_nonterm_id: UUID
     ) -> Grammar:
+        """Return new grammar with two given nonterminals
+        merged into a new nonterminal
+
+        Args:
+            nonterm_1_id: ID of the first nonterminal to merge in the
+                nonterminals dict
+            nonterm_2_id: ID of the second nonterminal to merge in the
+                nonterminals dict
+            new_nonterm_id: ID of the new nonterminal
+
+        Returns:
+            Grammar: new grammar object with merged nonterminals into
+                one new nonterminal
+        """
 
         reachable_labels = self.nonterminals[nonterm_1_id].reachable_labels
         if reachable_labels != self.nonterminals[nonterm_2_id].reachable_labels:
