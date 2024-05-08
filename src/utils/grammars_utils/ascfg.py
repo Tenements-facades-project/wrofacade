@@ -579,9 +579,7 @@ class Grammar:
                 terminal_id = uuid.uuid4()
                 parent_gen_symbol = tree.get_node(parent_identifier).data
                 terminal = Terminal(
-                    ImgRange(
-                        img=parent_gen_symbol.img, mask=parent_gen_symbol.mask
-                    )
+                    ImgRange(img=parent_gen_symbol.img, mask=parent_gen_symbol.mask)
                 )
                 terminals[terminal_id] = terminal
                 rules.append(
@@ -681,7 +679,9 @@ class Grammar:
 
         return parse_tree
 
-    def merge_nonterminals(self, nonterm_1_id: UUID, nonterm_2_id: UUID, new_nonterm_id: UUID | None = None) -> Grammar:
+    def merge_nonterminals(
+        self, nonterm_1_id: UUID, nonterm_2_id: UUID, new_nonterm_id: UUID | None = None
+    ) -> Grammar:
 
         reachable_labels = self.nonterminals[nonterm_1_id].reachable_labels
         if reachable_labels != self.nonterminals[nonterm_2_id].reachable_labels:
@@ -693,22 +693,20 @@ class Grammar:
             for rule in rules:
                 if rule.lhs == nt_id:
                     rule.lhs = new_nonterm_id
-                if rule.rule_type == 'split':
+                if rule.rule_type == "split":
                     if nt_id in rule.rhs:
-                        rhs = list(rule.rhs)
-                        rhs = [new_nonterm_id if symbol_id == nt_id else symbol_id for symbol_id in
-                               rhs]
-                        rule.rhs = tuple(rhs)
+                        rule.rhs = [
+                            tuple(
+                                new_nonterm_id if symbol_id == nt_id else symbol_id
+                                for symbol_id in rule.rhs
+                            )
+                        ]
                 else:
                     if nt_id == rule.rhs:
                         rule.rhs = new_nonterm_id
         new_nonterm = Nonterminal(reachable_labels=reachable_labels)
         nonterminals[new_nonterm_id] = new_nonterm
-        return Grammar(
-            terminals=self.terminals,
-            nonterminals=nonterminals,
-            rules=rules
-        )
+        return Grammar(terminals=self.terminals, nonterminals=nonterminals, rules=rules)
 
 
 def merge_grammars(grammars: list[Grammar]) -> Grammar:
