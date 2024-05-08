@@ -181,6 +181,9 @@ class ProductionRule:
     def __divide_area(
         lower_bound: int, higher_bound: int, attribute: RuleAttribute
     ) -> list[tuple[int, int]]:
+        """Returns indices of division, given an area bounds
+        and an attribute with output relative sizes
+        """
         all_size = higher_bound - lower_bound
         if all_size < 2:
             raise ValueError("`upper_bound - lower_bound` should be at least 2")
@@ -195,6 +198,9 @@ class ProductionRule:
         return segments_bounds
 
     def choose_attribute_idx(self) -> int:
+        """Choose randomly index i,
+        i in [0, len(self.attributes))
+        """
         rng = np.random.default_rng()
         return rng.choice(len(self.attributes), p=self.attributes_probs)
 
@@ -278,7 +284,7 @@ class ProductionRule:
 
         Args:
             lhs_box (ImgBox): LHS box
-            rhs_general_symbols list[GeneralSymbol]: list of general symbols
+            rhs_general_symbols: list[GeneralSymbol]: list of general symbols
                 with shapes that should be produced from the LHS box
             rhs_ids (list[UUID]): list of IDs that rule will assign to its output
                 symbols
@@ -299,21 +305,21 @@ class ProductionRule:
             rule_type = "split"
             attributes_probs = [1.0]
             rhs_ids = tuple(rhs_ids)
-            if rhs_general_symbols[0].mask_original.shape[0] == lhs_height:
+            if rhs_general_symbols[0].mask.shape[0] == lhs_height:
                 split_direction = "vertical"
                 attributes = [
                     RuleAttribute(
                         sizes=[
-                            nt.mask_original.shape[1] / lhs_width for nt in rhs_general_symbols
+                            nt.mask.shape[1] / lhs_width for nt in rhs_general_symbols
                         ]
                     )
                 ]
-            elif rhs_general_symbols[0].mask_original.shape[1] == lhs_width:
+            elif rhs_general_symbols[0].mask.shape[1] == lhs_width:
                 split_direction = "horizontal"
                 attributes = [
                     RuleAttribute(
                         sizes=[
-                            nt.mask_original.shape[0] / lhs_height for nt in rhs_general_symbols
+                            nt.mask.shape[0] / lhs_height for nt in rhs_general_symbols
                         ]
                     )
                 ]
@@ -382,8 +388,11 @@ class StartProduction:
 
 
 def general_symbol_to_symbol(gen_symbol: GeneralSymbol) -> Symbol:
+    """Converts a general symbol obtained with general grammar
+    to an ASCFG symbol
+    """
     if isinstance(gen_symbol, GeneralTerminal):
-        return Terminal(ImgRange(gen_symbol.img, gen_symbol.mask_original))
+        return Terminal(ImgRange(gen_symbol.img, gen_symbol.mask))
     if isinstance(gen_symbol, GeneralNonterminal):
         _, mask = gen_symbol.lattice.label_major_vote().assemble_lattice()
         return Nonterminal(reachable_labels=set(np.unique(mask)))
@@ -511,7 +520,7 @@ class Grammar:
         root_node_id = "0"
         root_node = tree.get_node(root_node_id)
         start_rule = StartProduction(
-            start_shape=root_node.data.mask_original.shape,
+            start_shape=root_node.data.mask.shape,
             start_nonterminal_id=uuid.uuid4(),
         )
         root_box = start_rule()
@@ -571,7 +580,7 @@ class Grammar:
                 parent_gen_symbol = tree.get_node(parent_identifier).data
                 terminal = Terminal(
                     ImgRange(
-                        img=parent_gen_symbol.img, mask=parent_gen_symbol.mask_original
+                        img=parent_gen_symbol.img, mask=parent_gen_symbol.mask
                     )
                 )
                 terminals[terminal_id] = terminal
@@ -592,6 +601,11 @@ class Grammar:
     def get_all_rules_for_lhs(
         self, lhs: UUID | str
     ) -> tuple[list[ProductionRule | StartProduction], list[float]]:
+        """Given ID of a nonterminal ('lhs'),
+        returns all rules from the grammar that are applicable
+        to this nonterminal (i.e. their LHS is `lhs`)
+        along with their probabilities
+        """
         rules_df_for_lhs = self.rules_df[self.rules_df["lhs"] == lhs]
         rules_for_lhs = rules_df_for_lhs["rules"].tolist()
         rules_probs_for_lhs = rules_df_for_lhs["rule_prob"].tolist()
@@ -600,12 +614,28 @@ class Grammar:
     def get_rule_for_lhs(
         self, lhs: UUID | str
     ) -> tuple[ProductionRule | StartProduction, float]:
+        """Chooses a production rule from the grammar
+        that is applicable to a nonterminal;
+        the rule is chosen randomly, according to
+        rules probabilities
+        """
         rules_for_lhs, rules_probs_for_lhs = self.get_all_rules_for_lhs(lhs)
         rng = np.random.default_rng()
         idx = rng.choice(len(rules_for_lhs), p=rules_probs_for_lhs)
         return rules_for_lhs[idx], rules_probs_for_lhs[idx]
 
     def generate_parse_tree(self) -> ParseTree:
+        """Performs production of the grammar
+
+        Start shape is generated with one of the starting rules that are
+        in the grammar. Next, the shape is split with grammar rules
+        and shapes are transformed until they are become terminal.
+        The parse tree is returned, which can be later use to obtain
+        generated lattice and generated facade's mask and image
+
+        Returns:
+            ParseTree: result parse tree object
+        """
         # get start production and create ParseTree object
         start_rule, start_rule_prob = self.get_rule_for_lhs("START")
         parse_tree = ParseTree(
@@ -682,6 +712,26 @@ class Grammar:
 
 
 def merge_grammars(grammars: list[Grammar]) -> Grammar:
+    """Given a list of grammars, creates a new merged grammar
+    that contains all grammars
+
+    The result grammar's nonterminals dict, terminals dict and
+    rules list contain nonterminals, terminals and rules from
+    all grammars, respectively (if two terminals/nonterminals
+    among terminals/nonterminals from all grammars have the same
+    ID, ValueError is raised). The result grammars contains
+    all start rules, so the production of the result grammar
+    is just random choice of the start rule and then production
+    with the one of the input grammars which start rule
+    has been chosen
+
+    Args:
+        grammars: list of Grammar objects to be merged into
+            one grammar
+
+    Returns:
+        Grammar: merged grammar object
+    """
     rules: list[ProductionRule | StartProduction] = (
         grammars[0].rules_df["rules"].tolist()
     )
