@@ -254,10 +254,10 @@ class EarleyParser2D:
 
         # get terminal most frequent label and check if it's consistent with lattice
         terminal = self.grammar.terminals[state.rule.rhs]
-        terminal_label = terminal.img_range.most_freqent_label()
+        terminal_label = terminal.img_range.most_frequent_label()
         i, j = state.origin_position
         try:
-            cell_label = lattice.ranges[j, i].most_freqent_label()
+            cell_label = lattice.ranges[j, i].most_frequent_label()
         except IndexError:
             warn("IndexError: a state outside lattice was produced")
             return None
