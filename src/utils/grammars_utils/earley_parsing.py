@@ -27,6 +27,30 @@ from .ascfg import (
 
 
 class EarleyState(BaseModel):
+    """Represents one derivation of grammar that is
+    (possibly) consistent with the input lattice to some
+    position in the grid
+
+    Attributes:
+        rule: grammar rule that has led to creation of the state
+        rule_prob: probability of choosing self.rule in the grammar
+        dot_position: position of the dot in RHS list; symbols left
+            to the dot are processed
+        origin_position: pair of indices (i, j) corresponding to the
+            position in the Earley chart
+        bbox_x: column index of the lower left corner of the bounding
+            box in the lattice
+        bbox_y: row index of the lower left corner of the bounding
+            box in the lattice
+        bbox_X: column index of the upper right corner of the bounding
+            box in the lattice
+        bbox_Y: row index of the upper right corner of the bounding
+            box in the lattice
+        scanning_history: is used to keep track of the symbols in the input grid
+            which were scanned by following the path to the state
+        child_states: list of states that comes from this state and are
+            complete (used to construct the parse tree)
+    """
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     rule: ProductionRule | StartProduction
@@ -64,6 +88,9 @@ class EarleyState(BaseModel):
 def get_starting_states_from_history(
         states_history: dict[tuple[int, int], list[EarleyState]]
 ) -> list[EarleyState]:
+    """Returns all complete starting states
+    from the states history
+    """
     starting_states: list[EarleyState] = []
     for grid_pos in states_history:
         for state in states_history[grid_pos]:
@@ -73,17 +100,42 @@ def get_starting_states_from_history(
 
 
 def get_state_pixels_shape(state: EarleyState, lattice: Lattice) -> tuple[int, int]:
+    """Obtains shape of the state bounding box
+    in pixels
+    """
     state_lattice = lattice[state.bbox_y: state.bbox_Y, state.bbox_x: state.bbox_X]
     return state_lattice.assemble_lattice()[1].shape
 
 
 class EarleyParser2D:
+    """Class implementing the Earley parser algorithms for 2D grammars
+
+    Attributes:
+        grammar: Grammar object to parse input lattice with
+    """
     def __init__(self, grammar: Grammar):
         self.grammar: Grammar = grammar
 
     def parse_lattice(
             self, lattice: Lattice, max_iterations: int = 5000
     ) -> tuple[list[ParseTree], dict[tuple[int, int], list[EarleyState]]]:
+        """Given a lattice, finds all valid grammar derivations (i.e. all
+        parse trees) that produce this lattice
+
+        Args:
+            lattice: lattice to be parsed
+            max_iterations: maximum number of iterations; after reaching
+                this number of iterations, the parsing loop finding new states is broken and
+                parse trees are built using states that were processed to this moment
+
+        Returns:
+            tuple: (parse_trees, states_history)
+
+        Notes:
+            reaching maximum number of iterations does not mean that the parsing
+                has failed, but the list of returned parse trees might be
+                incomplete
+        """
         # create states history dict and states queue
         lat_n_rows, lat_n_cols = lattice.ranges.shape
         states_history = {
@@ -157,6 +209,9 @@ class EarleyParser2D:
             self,
             state: EarleyState,
     ) -> list[EarleyState]:
+        """The prediction step: find all potential
+            expansions of the non-terminal to the right of the dot
+        """
         new_states: list[EarleyState] = []
 
         # extract the symbol to the right of the dot
@@ -189,6 +244,9 @@ class EarleyParser2D:
             state: EarleyState,
             lattice: Lattice,
     ) -> EarleyState | None:
+        """The scanning step - check if the input
+        state is compliant with the input lattice
+        """
 
         # state is assumed to contain lexical production
         if state.rule.rule_type != "lexical":
@@ -229,6 +287,9 @@ class EarleyParser2D:
     def __check_complete_candidate(
             self, complete_state: EarleyState, candidate_state: EarleyState
     ) -> bool:
+        """Check if the candidate_state fulfill all conditions
+        to undergo the completion step
+        """
         # check if candidate is not complete
         if candidate_state.is_complete():
             return False
@@ -307,6 +368,10 @@ class EarleyParser2D:
             complete_state: EarleyState,
             states_history: dict[tuple[int, int], list[EarleyState]],
     ) -> list[EarleyState]:
+        """Completion step: after obtaining a complete state, get updated
+        states where a symbol right to the dot should be considered as
+        processed
+        """
         # extract all states that can be completed
         candidate_states = [
             candidate_state
@@ -418,6 +483,9 @@ class EarleyParser2D:
     def __parse_trees_from_states_history(
             self, states_history: dict[tuple[int, int], list[EarleyState]], lattice: Lattice
     ) -> list[ParseTree]:
+        """Builds grammar parse trees of the lattice, using states
+        history from parsing
+        """
         # extract complete starting states from parsing states history
         starting_states = get_starting_states_from_history(states_history)
 
