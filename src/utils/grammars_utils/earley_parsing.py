@@ -121,7 +121,6 @@ class EarleyParser2D:
         while states_queue:
             i += 1
             if i == max_iterations:
-                # TODO: why it happens?
                 warn("Maximum number of iterations reached, parsing stopped!")
                 break
             state = states_queue.pop(0)
@@ -202,7 +201,6 @@ class EarleyParser2D:
         try:
             cell_label = lattice.ranges[j, i].most_freqent_label()
         except IndexError:
-            # TODO: find the error's cause
             warn("IndexError: a state outside lattice was produced")
             return None
         if terminal_label != cell_label:
