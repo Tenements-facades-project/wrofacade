@@ -9,3 +9,5 @@ treelib
 pillow
 PyYAML
 transformers
+pandas
+pydantic
