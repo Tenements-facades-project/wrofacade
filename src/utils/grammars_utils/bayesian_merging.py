@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from .lattice import Lattice
+from ..lattice_utils.lattice import Lattice
 from .ascfg import Nonterminal, Grammar
 from .earley_parsing import EarleyParser2D
 
@@ -153,6 +153,20 @@ class BayesianMerger:
         checkpoint_dir: str | None = None,
         checkpoint_every_n: int | None = None
     ) -> tuple[Grammar, float]:
+        """Runs Bayesian merging on a grammar
+
+        Args:
+            grammar: starting grammar
+            lattices: list of lattices to calculate logprob of
+                candidate grammars
+            n_epochs: number of epochs (i.e. merging iterations)
+            checkpoint_dir: path to the directory to save checkpoints
+            checkpoint_every_n: every checkpoint_every_n a checkpoint
+                will be saved
+
+        Returns:
+            tuple: (grammar, loss_val)
+        """
         for i in range(n_epochs):
             print(f"Epoch {i + 1}")
             try:
