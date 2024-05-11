@@ -713,9 +713,9 @@ class Grammar:
                 if rule.rule_type == "split":
                     if nt_id in rule.rhs:
                         rule.rhs = tuple(
-                                new_nonterm_id if symbol_id == nt_id else symbol_id
-                                for symbol_id in rule.rhs
-                            )
+                            new_nonterm_id if symbol_id == nt_id else symbol_id
+                            for symbol_id in rule.rhs
+                        )
                 else:
                     if nt_id == rule.rhs:
                         rule.rhs = new_nonterm_id

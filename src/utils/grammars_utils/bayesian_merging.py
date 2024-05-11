@@ -22,7 +22,9 @@ class BayesianMerger:
         eps: smoothing term used while computing logarithms
     """
 
-    def __init__(self, w: float, strategy: str, n_random_draws: int = 10, eps: float = 1e-4):
+    def __init__(
+        self, w: float, strategy: str, n_random_draws: int = 10, eps: float = 1e-4
+    ):
         self.w: float = w
         self.strategy: str = strategy
         self.n_random_draws: int = n_random_draws
@@ -45,14 +47,18 @@ class BayesianMerger:
             nonterminals_reachable.append(nonterm.reachable_labels)
 
         nonterminals_df = pd.DataFrame(
-            {'nonterminals': nonterminals_list,
-            'reachable_labels': nonterminals_reachable},
+            {
+                "nonterminals": nonterminals_list,
+                "reachable_labels": nonterminals_reachable,
+            },
             index=nonterminals_ids,
         )
         return nonterminals_df
 
     @staticmethod
-    def __get_random_nonterminal(nonterminals_df: pd.DataFrame) -> tuple[UUID, Nonterminal]:
+    def __get_random_nonterminal(
+        nonterminals_df: pd.DataFrame,
+    ) -> tuple[UUID, Nonterminal]:
         """Given a dataframe of nonterminals, draws random
         nonterminal
         """
@@ -70,7 +76,8 @@ class BayesianMerger:
         nonterm_1_id, nonterm_1 = self.__get_random_nonterminal(nonterminals_df)
 
         same_reachable_df = nonterminals_df[
-            nonterminals_df["reachable_labels"] == nonterm_1.reachable_labels]
+            nonterminals_df["reachable_labels"] == nonterm_1.reachable_labels
+        ]
         same_reachable_df = same_reachable_df.drop(nonterm_1_id)
         if same_reachable_df.shape[0] == 0:
             # no compatible nonterminal
@@ -81,7 +88,9 @@ class BayesianMerger:
         new_nonterm_id = uuid.uuid4()
 
         grammar = grammar.merge_nonterminals(
-            nonterm_1_id=nonterm_1_id, nonterm_2_id=nonterm_2_id, new_nonterm_id=new_nonterm_id
+            nonterm_1_id=nonterm_1_id,
+            nonterm_2_id=nonterm_2_id,
+            new_nonterm_id=new_nonterm_id,
         )
 
         return grammar
@@ -105,10 +114,8 @@ class BayesianMerger:
 
         # sum all parse trees probabilities and return log of it
         return np.log(
-            np.sum([
-                np.exp(parse_tree.logprob()) for parse_tree in parse_trees
-            ]
-                  ) + self.eps
+            np.sum([np.exp(parse_tree.logprob()) for parse_tree in parse_trees])
+            + self.eps
         )
 
     def __grammar_loss(
@@ -137,8 +144,12 @@ class BayesianMerger:
 
         new_grammars_losses = [
             self.__grammar_loss(
-                new_grammar, parser=EarleyParser2D(new_grammar), lattices=lattices, w=self.w
-            ) for new_grammar in tqdm(new_grammars)
+                new_grammar,
+                parser=EarleyParser2D(new_grammar),
+                lattices=lattices,
+                w=self.w,
+            )
+            for new_grammar in tqdm(new_grammars)
         ]
 
         best_idx = np.argmin(new_grammars_losses)
@@ -151,7 +162,7 @@ class BayesianMerger:
         lattices: list[Lattice],
         n_epochs: int,
         checkpoint_dir: str | None = None,
-        checkpoint_every_n: int | None = None
+        checkpoint_every_n: int | None = None,
     ) -> tuple[Grammar, float]:
         """Runs Bayesian merging on a grammar
 
@@ -182,6 +193,8 @@ class BayesianMerger:
                 print(e)
             if checkpoint_dir:
                 if i % checkpoint_every_n == 0:
-                    with open(os.path.join(checkpoint_dir, f"checkpoint_{i}.pickle"), 'wb') as f:
+                    with open(
+                        os.path.join(checkpoint_dir, f"checkpoint_{i}.pickle"), "wb"
+                    ) as f:
                         pickle.dump(grammar, f)
         return grammar, loss_val

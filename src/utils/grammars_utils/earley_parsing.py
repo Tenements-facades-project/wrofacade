@@ -6,6 +6,7 @@ Early Parsing for 2D Stochastic
 Context Free Grammars; Technical Report
 
 """
+
 from __future__ import annotations
 
 from itertools import product
@@ -51,6 +52,7 @@ class EarleyState(BaseModel):
         child_states: list of states that comes from this state and are
             complete (used to construct the parse tree)
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     rule: ProductionRule | StartProduction
@@ -86,7 +88,7 @@ class EarleyState(BaseModel):
 
 
 def get_starting_states_from_history(
-        states_history: dict[tuple[int, int], list[EarleyState]]
+    states_history: dict[tuple[int, int], list[EarleyState]]
 ) -> list[EarleyState]:
     """Returns all complete starting states
     from the states history
@@ -103,7 +105,7 @@ def get_state_pixels_shape(state: EarleyState, lattice: Lattice) -> tuple[int, i
     """Obtains shape of the state bounding box
     in pixels
     """
-    state_lattice = lattice[state.bbox_y: state.bbox_Y, state.bbox_x: state.bbox_X]
+    state_lattice = lattice[state.bbox_y : state.bbox_Y, state.bbox_x : state.bbox_X]
     return state_lattice.assemble_lattice()[1].shape
 
 
@@ -113,11 +115,12 @@ class EarleyParser2D:
     Attributes:
         grammar: Grammar object to parse input lattice with
     """
+
     def __init__(self, grammar: Grammar):
         self.grammar: Grammar = grammar
 
     def parse_lattice(
-            self, lattice: Lattice, max_iterations: int = 5000
+        self, lattice: Lattice, max_iterations: int = 5000
     ) -> tuple[list[ParseTree], dict[tuple[int, int], list[EarleyState]]]:
         """Given a lattice, finds all valid grammar derivations (i.e. all
         parse trees) that produce this lattice
@@ -208,11 +211,11 @@ class EarleyParser2D:
         return parse_trees, states_history
 
     def __predict(
-            self,
-            state: EarleyState,
+        self,
+        state: EarleyState,
     ) -> list[EarleyState]:
         """The prediction step: find all potential
-            expansions of the non-terminal to the right of the dot
+        expansions of the non-terminal to the right of the dot
         """
         new_states: list[EarleyState] = []
 
@@ -242,9 +245,9 @@ class EarleyParser2D:
         return new_states
 
     def __scan(
-            self,
-            state: EarleyState,
-            lattice_mv: Lattice,
+        self,
+        state: EarleyState,
+        lattice_mv: Lattice,
     ) -> EarleyState | None:
         """The scanning step - check if the input
         state is compliant with the input lattice (after
@@ -296,7 +299,7 @@ class EarleyParser2D:
         )
 
     def __check_complete_candidate(
-            self, complete_state: EarleyState, candidate_state: EarleyState
+        self, complete_state: EarleyState, candidate_state: EarleyState
     ) -> bool:
         """Check if the candidate_state fulfill all conditions
         to undergo the completion step
@@ -320,12 +323,12 @@ class EarleyParser2D:
 
         # check if candidate_state's bbox encompasses complete_state's bbox
         if any(
-                [
-                    complete_state.bbox_x < candidate_state.bbox_x,
-                    complete_state.bbox_y < candidate_state.bbox_y,
-                    complete_state.bbox_X > candidate_state.bbox_X,
-                    complete_state.bbox_Y > candidate_state.bbox_Y,
-                ]
+            [
+                complete_state.bbox_x < candidate_state.bbox_x,
+                complete_state.bbox_y < candidate_state.bbox_y,
+                complete_state.bbox_X > candidate_state.bbox_X,
+                complete_state.bbox_Y > candidate_state.bbox_Y,
+            ]
         ):
             return False
 
@@ -333,51 +336,51 @@ class EarleyParser2D:
         H_complete = complete_state.scanning_history
         H_candidate = candidate_state.scanning_history
         if not np.all(
-                (H_complete == H_candidate)
-                | (pd.isnull(H_complete))
-                | (pd.isnull(H_candidate))
+            (H_complete == H_candidate)
+            | (pd.isnull(H_complete))
+            | (pd.isnull(H_candidate))
         ):
             return False
 
         # check dimensions alingment
         if (
-                complete_state.rule.split_direction == "vertical"
-                and candidate_state.rule.split_direction == "vertical"
+            complete_state.rule.split_direction == "vertical"
+            and candidate_state.rule.split_direction == "vertical"
         ):
             if (
-                    complete_state.bbox_Y != candidate_state.bbox_Y
+                complete_state.bbox_Y != candidate_state.bbox_Y
             ) and candidate_state.dot_position != 0:
                 return False
         if (
-                complete_state.rule.split_direction == "horizontal"
-                and candidate_state.rule.split_direction == "vertical"
+            complete_state.rule.split_direction == "horizontal"
+            and candidate_state.rule.split_direction == "vertical"
         ):
             if (
-                    complete_state.bbox_Y != candidate_state.bbox_Y
+                complete_state.bbox_Y != candidate_state.bbox_Y
             ) and candidate_state.dot_position != 0:
                 return False
         if (
-                complete_state.rule.split_direction == "vertical"
-                and candidate_state.rule.split_direction == "horizontal"
+            complete_state.rule.split_direction == "vertical"
+            and candidate_state.rule.split_direction == "horizontal"
         ):
             if (
-                    complete_state.bbox_X != candidate_state.bbox_X
+                complete_state.bbox_X != candidate_state.bbox_X
             ) and candidate_state.dot_position != 0:
                 return False
         if (
-                complete_state.rule.split_direction == "horizontal"
-                and candidate_state.rule.split_direction == "horizontal"
+            complete_state.rule.split_direction == "horizontal"
+            and candidate_state.rule.split_direction == "horizontal"
         ):
             if (
-                    complete_state.bbox_X != candidate_state.bbox_X
+                complete_state.bbox_X != candidate_state.bbox_X
             ) and candidate_state.dot_position != 0:
                 return False
         return True
 
     def __complete(
-            self,
-            complete_state: EarleyState,
-            states_history: dict[tuple[int, int], list[EarleyState]],
+        self,
+        complete_state: EarleyState,
+        states_history: dict[tuple[int, int], list[EarleyState]],
     ) -> list[EarleyState]:
         """Completion step: after obtaining a complete state, get updated
         states where a symbol right to the dot should be considered as
@@ -467,8 +470,8 @@ class EarleyParser2D:
                     )
                 )
             if (
-                    p.split_direction == "horizontal"
-                    and p_prim.split_direction == "horizontal"
+                p.split_direction == "horizontal"
+                and p_prim.split_direction == "horizontal"
             ):
                 new_states.append(
                     EarleyState(
@@ -492,7 +495,7 @@ class EarleyParser2D:
         return new_states
 
     def __parse_trees_from_states_history(
-            self, states_history: dict[tuple[int, int], list[EarleyState]], lattice: Lattice
+        self, states_history: dict[tuple[int, int], list[EarleyState]], lattice: Lattice
     ) -> list[ParseTree]:
         """Builds grammar parse trees of the lattice, using states
         history from parsing
