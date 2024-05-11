@@ -67,12 +67,11 @@ class BayesianMerger:
         nonterm = sample["nonterminals"].iloc[0]
         return nonterm_id, nonterm
 
-    def __random_merge(self, grammar: Grammar) -> Grammar:
+    def __random_merge(self, grammar: Grammar, nonterminals_df: pd.DataFrame) -> Grammar:
         """Draws two random label-compatible nonterminals
         from the grammar and returns new grammar with these
         two nonterminals merged into one nonterminal
         """
-        nonterminals_df = self.__get_nonterminals_df(grammar)
         nonterm_1_id, nonterm_1 = self.__get_random_nonterminal(nonterminals_df)
 
         same_reachable_df = nonterminals_df[
@@ -138,8 +137,9 @@ class BayesianMerger:
         lattices: list[Lattice],
     ) -> tuple[Grammar, float]:
 
+        nonterminals_df = self.__get_nonterminals_df(grammar)
         new_grammars = [
-            self.__random_merge(grammar) for _ in range(self.n_random_draws)
+            self.__random_merge(grammar, nonterminals_df) for _ in range(self.n_random_draws)
         ]
 
         new_grammars_losses = [
