@@ -136,6 +136,8 @@ class EarleyParser2D:
                 has failed, but the list of returned parse trees might be
                 incomplete
         """
+        lattice_mv = lattice.label_major_vote()
+
         # create states history dict and states queue
         lat_n_rows, lat_n_cols = lattice.ranges.shape
         states_history = {
@@ -185,7 +187,7 @@ class EarleyParser2D:
 
             else:
                 if state.rule.rule_type == "lexical":
-                    scan_result_state = self.__scan(state=state, lattice=lattice)
+                    scan_result_state = self.__scan(state=state, lattice_mv=lattice_mv)
                     if scan_result_state:
                         new_states = [scan_result_state]
                     else:
@@ -242,10 +244,19 @@ class EarleyParser2D:
     def __scan(
             self,
             state: EarleyState,
-            lattice: Lattice,
+            lattice_mv: Lattice,
     ) -> EarleyState | None:
         """The scanning step - check if the input
-        state is compliant with the input lattice
+        state is compliant with the input lattice (after
+        major vote operation)
+
+        Args:
+            state: input state to scan
+            lattice_mv: Lattice object, result of major vote operation
+
+        Notes:
+            remember to pass the lattice after major vote operation as
+                the function does not check it
         """
 
         # state is assumed to contain lexical production
@@ -254,10 +265,10 @@ class EarleyParser2D:
 
         # get terminal most frequent label and check if it's consistent with lattice
         terminal = self.grammar.terminals[state.rule.rhs]
-        terminal_label = terminal.img_range.most_frequent_label()
+        terminal_label = terminal.most_frequent_label
         i, j = state.origin_position
         try:
-            cell_label = lattice.ranges[j, i].most_frequent_label()
+            cell_label = lattice_mv.ranges[j, i].mask[0, 0]
         except IndexError:
             warn("IndexError: a state outside lattice was produced")
             return None
