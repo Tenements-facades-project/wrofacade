@@ -23,7 +23,7 @@ class GrammarMaskGenerator(SegMaskGenerator):
         self,
         grammar_or_path: Grammar | str,
         label2clr: dict[str, list[int]],
-        n_attempts: int = 20
+        n_attempts: int = 20,
     ):
         super().__init__()
         if isinstance(grammar_or_path, Grammar):
@@ -37,7 +37,7 @@ class GrammarMaskGenerator(SegMaskGenerator):
         """Loads Grammar object from pickle
         and saves it in `self.grammar`
         """
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             grammar = pickle.load(f)
         if not isinstance(grammar, Grammar):
             raise RuntimeError("Provided pickle file does not contain grammar object!")
@@ -58,10 +58,12 @@ class GrammarMaskGenerator(SegMaskGenerator):
                 parse_tree = self.grammar.generate_parse_tree()
                 _, mask = parse_tree.assemble_image()
                 return SegmentationMask(
-                    Image.fromarray(mask, 'L'),
+                    Image.fromarray(mask, "L"),
                     label2clr=self.label2clr,
                 )
             except ValidationError:
                 pass
-        raise RuntimeError("Maximum number of unsuccessful attempts reached when trying"
-                           "to generate mask")
+        raise RuntimeError(
+            "Maximum number of unsuccessful attempts reached when trying"
+            "to generate mask"
+        )
