@@ -25,25 +25,21 @@ args = parser.parse_args()
 
 
 def load_facade_and_mask(facade_name: str) -> tuple[np.ndarray, np.ndarray]:
-    img = cv2.imread(os.path.join(
-        args.imgs_dir, f"{facade_name}.{args.imgs_ext}"
-    ))
-    mask = cv2.imread(os.path.join(
-        args.masks_dir, f"{facade_name}.png"
-    ))
+    img = cv2.imread(os.path.join(args.imgs_dir, f"{facade_name}.{args.imgs_ext}"))
+    mask = cv2.imread(os.path.join(args.masks_dir, f"{facade_name}.png"))
     if img is None:
-        raise ValueError(f"There's no image of facade {facade_name} in provided imgs directory")
+        raise ValueError(
+            f"There's no image of facade {facade_name} in provided imgs directory"
+        )
     if mask is None:
-        raise ValueError(f"There's no mask of facade {facade_name} in provided masks directory")
-    return img, mask[:,:,2]
+        raise ValueError(
+            f"There's no mask of facade {facade_name} in provided masks directory"
+        )
+    return img, mask[:, :, 2]
 
 
-def remove_margin(
-    l: list[int], left_margin: int, right_margin: int
-) -> list[int]:
-    return [
-        x for x in l if ((x > left_margin) and (x < right_margin))
-    ]
+def remove_margin(l: list[int], left_margin: int, right_margin: int) -> list[int]:
+    return [x for x in l if ((x > left_margin) and (x < right_margin))]
 
 
 def get_facade_lattice(
@@ -52,29 +48,30 @@ def get_facade_lattice(
     dbscan_eps: int,
     dbscan_min_samples: int,
     margin: int,
-    min_change_coef: float
+    min_change_coef: float,
 ) -> Lattice:
     hor_lines_inds, ver_lines_inds = infer_split_lines(
-        mask=mask, dbscan_params={'eps': dbscan_eps, 'min_samples': dbscan_min_samples},
-        min_change_coef=min_change_coef
+        mask=mask,
+        dbscan_params={"eps": dbscan_eps, "min_samples": dbscan_min_samples},
+        min_change_coef=min_change_coef,
     )
     hor_lines_inds = remove_margin(hor_lines_inds, margin, mask.shape[0] - margin)
     ver_lines_inds = remove_margin(ver_lines_inds, margin, mask.shape[1] - margin)
     return Lattice.from_lines(
-        img=img, mask=mask,
-        horizontal_lines_inds=hor_lines_inds, vertical_lines_inds=ver_lines_inds
+        img=img,
+        mask=mask,
+        horizontal_lines_inds=hor_lines_inds,
+        vertical_lines_inds=ver_lines_inds,
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # load facades' images and masks
 
     print("Loading images and masks of facades ...")
     facades_names = [os.path.splitext(fname)[0] for fname in os.listdir(args.imgs_dir)]
-    facades = [
-        load_facade_and_mask(facade_name) for facade_name in tqdm(facades_names)
-    ]
+    facades = [load_facade_and_mask(facade_name) for facade_name in tqdm(facades_names)]
     print(f"Loaded {len(facades)} facades")
 
     # downsample facade's images and masks
@@ -91,7 +88,14 @@ if __name__ == '__main__':
     print("Cropping facades ...")
     # create rectangular lattices just for cropping
     lattices = [
-        get_facade_lattice(img=img, mask=mask, dbscan_eps=3, dbscan_min_samples=1, min_change_coef=0.02, margin=0)
+        get_facade_lattice(
+            img=img,
+            mask=mask,
+            dbscan_eps=3,
+            dbscan_min_samples=1,
+            min_change_coef=0.02,
+            margin=0,
+        )
         for img, mask in downsampled_facades
     ]
     # crop facades' lattices
@@ -109,6 +113,13 @@ if __name__ == '__main__':
 
     print("Creating rectangular lattices ...")
     lattices = [
-        get_facade_lattice(img=img, mask=mask, dbscan_eps=5, dbscan_min_samples=1, min_change_coef=0.15, margin=10)
+        get_facade_lattice(
+            img=img,
+            mask=mask,
+            dbscan_eps=5,
+            dbscan_min_samples=1,
+            min_change_coef=0.15,
+            margin=10,
+        )
         for img, mask in cropped_facades
     ]

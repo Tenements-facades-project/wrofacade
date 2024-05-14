@@ -4,7 +4,9 @@ import cv2
 from .lattice import Lattice
 
 
-def resize_facade(img: np.ndarray, mask: np.ndarray, resizing_factor: float) -> tuple[np.ndarray, np.ndarray]:
+def resize_facade(
+    img: np.ndarray, mask: np.ndarray, resizing_factor: float
+) -> tuple[np.ndarray, np.ndarray]:
     """Resizes facade and its segmentation mask
 
     Args:
@@ -17,9 +19,7 @@ def resize_facade(img: np.ndarray, mask: np.ndarray, resizing_factor: float) -> 
     height, width = mask.shape
     output_shape = (int(width * resizing_factor), int(height * resizing_factor))
     resized_img = cv2.resize(img, output_shape)
-    resized_mask = cv2.resize(
-        mask, output_shape, interpolation=cv2.INTER_NEAREST
-    )
+    resized_mask = cv2.resize(mask, output_shape, interpolation=cv2.INTER_NEAREST)
     return resized_img, resized_mask
 
 
@@ -44,10 +44,12 @@ def crop_facade(
     n_rows, n_cols = lattice.ranges.shape
     for row in lattice.ranges:
         rows_indicator.append(
-            sum([rng.most_frequent_label() == background_label for rng in row]) < n_cols * cutoff_threshold
+            sum([rng.most_frequent_label() == background_label for rng in row])
+            < n_cols * cutoff_threshold
         )
     for col in lattice.ranges.transpose():
         cols_indicator.append(
-            sum([rng.most_frequent_label() == background_label for rng in col]) < n_rows * cutoff_threshold
+            sum([rng.most_frequent_label() == background_label for rng in col])
+            < n_rows * cutoff_threshold
         )
     return lattice[rows_indicator][:, cols_indicator]
