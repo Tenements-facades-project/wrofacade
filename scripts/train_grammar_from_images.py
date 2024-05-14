@@ -1,5 +1,6 @@
 import argparse
 import os
+import pickle
 import numpy as np
 import cv2
 from tqdm import tqdm
@@ -20,6 +21,7 @@ parser.add_argument("output_dir")
 parser.add_argument("--window_labels", nargs="*", type=int, required=True)
 parser.add_argument("--output_pickle_name", default="grammar.pickle")
 parser.add_argument("--checkpoints_dir", default="checkpoints")
+parser.add_argument("--checkpoint_every_n", type=int, default=100)
 parser.add_argument("--imgs_ext", default="png")
 parser.add_argument("--downsampling_factor", default=0.17, type=float)
 parser.add_argument("--background_label", default=0, type=int)
@@ -162,8 +164,23 @@ if __name__ == "__main__":
     grammar = merge_grammars(grammars)
 
     # induce generative grammar
+    print("Training generative grammar ...")
     merger = BayesianMerger(
         w=2.0,
         strategy="random_draw",
         n_random_draws=args.n_random_draws,
     )
+    grammar, loss_val = merger.perform_merging(
+        grammar=grammar,
+        lattices=lattices,
+        n_epochs=args.n_epochs,
+        checkpoint_dir=args.checkpoints_dir,
+        checkpoint_every_n=args.checkpoint_every_n,
+    )
+
+    # save resulting grammar
+    print(f"Training ended with loss {loss_val}")
+    output_path = os.path.join(args.output_dir, args.output_pickle_name)
+    print(f"Saving grammar to {output_path} ...")
+    with open(output_path, 'wb') as f:
+        pickle.dump(grammar, f)
