@@ -1,9 +1,10 @@
 import numpy as np
+import cv2
 
 from .lattice import Lattice
 
 
-def resize_facade(img: np.ndarray, mask: np.ndarray, resizing_factor: float) -> tuple[img, img]:
+def resize_facade(img: np.ndarray, mask: np.ndarray, resizing_factor: float) -> tuple[np.ndarray, np.ndarray]:
     """Resizes facade and its segmentation mask
 
     Args:
