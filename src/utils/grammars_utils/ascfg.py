@@ -28,11 +28,14 @@ class Terminal:
     Attributes:
         img_range (ImgRange): ImgRange object with an image area associated
             with the terminal symbol
+        most_frequent_label (int): most frequent pixel label in the mask,
+            calculated automatically when creating the object
 
     """
 
     def __init__(self, img_range: ImgRange):
         self.img_range: ImgRange = img_range
+        self.most_frequent_label: int = self.img_range.most_frequent_label()
 
     def resize(self, height: int, width: int) -> ImgRange:
         """Returns the image range (image with mask) associated
@@ -709,12 +712,10 @@ class Grammar:
                     rule.lhs = new_nonterm_id
                 if rule.rule_type == "split":
                     if nt_id in rule.rhs:
-                        rule.rhs = [
-                            tuple(
-                                new_nonterm_id if symbol_id == nt_id else symbol_id
-                                for symbol_id in rule.rhs
-                            )
-                        ]
+                        rule.rhs = tuple(
+                            new_nonterm_id if symbol_id == nt_id else symbol_id
+                            for symbol_id in rule.rhs
+                        )
                 else:
                     if nt_id == rule.rhs:
                         rule.rhs = new_nonterm_id
