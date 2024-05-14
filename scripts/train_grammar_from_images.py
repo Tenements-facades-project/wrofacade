@@ -72,14 +72,12 @@ def get_facade_lattice(
     )
 
 
-def get_best_parse_tree(
-    lattice: Lattice
-) -> Tree:
+def get_best_parse_tree(lattice: Lattice) -> Tree:
     facade_nt = Facade(
         lattice=lattice,
         max_ground_floor=0.3,
         n_possible_splits=3,
-        window_labels=args.window_labels
+        window_labels=args.window_labels,
     )
     trees = parse_facade(facade_nt, max_depth=-1)
     trees_losses = [get_tree_loss(tree) for tree in trees]
@@ -148,17 +146,13 @@ if __name__ == "__main__":
     # create parse trees from lattices
 
     print("Creating parse trees of facades from lattices ...")
-    general_parse_trees = [
-        get_best_parse_tree(lattice)
-        for lattice in tqdm(lattices)
-    ]
+    general_parse_trees = [get_best_parse_tree(lattice) for lattice in tqdm(lattices)]
 
     # create ASCFG grammar from facades
 
     print("Creating instance-specific grammars ...")
     grammars = [
-        Grammar.from_general_parse_tree(tree)
-        for tree in tqdm(general_parse_trees)
+        Grammar.from_general_parse_tree(tree) for tree in tqdm(general_parse_trees)
     ]
     print("Merging into one stochastic grammar ...")
     grammar = merge_grammars(grammars)
@@ -182,5 +176,5 @@ if __name__ == "__main__":
     print(f"Training ended with loss {loss_val}")
     output_path = os.path.join(args.output_dir, args.output_pickle_name)
     print(f"Saving grammar to {output_path} ...")
-    with open(output_path, 'wb') as f:
+    with open(output_path, "wb") as f:
         pickle.dump(grammar, f)
