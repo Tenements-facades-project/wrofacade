@@ -1,4 +1,25 @@
+import numpy as np
+
 from .lattice import Lattice
+
+
+def resize_facade(img: np.ndarray, mask: np.ndarray, resizing_factor: float) -> tuple[img, img]:
+    """Resizes facade and its segmentation mask
+
+    Args:
+        img (3D array): input facade image
+        mask (2D array): segmentation mask of the image
+
+    Returns:
+        tuple: (resized_img, resized_mask)
+    """
+    height, width = mask.shape
+    output_shape = (int(width * resizing_factor), int(height * resizing_factor))
+    resized_img = cv2.resize(img, output_shape)
+    resized_mask = cv2.resize(
+        mask, output_shape, interpolation=cv2.INTER_NEAREST
+    )
+    return resized_img, resized_mask
 
 
 def crop_facade(
