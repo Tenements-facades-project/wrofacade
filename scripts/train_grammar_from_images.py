@@ -12,6 +12,7 @@ from src.utils.lattice_utils.data_manipulations import resize_facade, crop_facad
 from src.utils.lattice_utils.split_lines import infer_split_lines
 from src.utils.lattice_utils.lattice import Lattice
 from src.utils.grammars_utils.general_grammar import Facade, parse_facade, get_tree_loss
+from src.utils.dataset_metadata import SEGFACADEDataset
 
 
 parser = argparse.ArgumentParser()
@@ -42,7 +43,7 @@ def load_facade_and_mask(facade_name: str) -> tuple[np.ndarray, np.ndarray]:
         raise ValueError(
             f"There's no mask of facade {facade_name} in provided masks directory"
         )
-    return img, mask[:, :, 2]
+    return img, mask[:, :, ::-1]
 
 
 def remove_margin(l: list[int], left_margin: int, right_margin: int) -> list[int]:
@@ -101,6 +102,13 @@ if __name__ == "__main__":
         downsampled_facades.append(
             resize_facade(img, mask, resizing_factor=args.downsampling_factor)
         )
+
+    # convert masks images to labels
+
+    print("Masks converting ...")
+    metadata = SEGFACADEDataset()
+    downsampled_facades = [(img,  metadata.parse_segmentation_image(mask))
+                           for img, mask in tqdm(downsampled_facades)]
 
     # crop facades
 

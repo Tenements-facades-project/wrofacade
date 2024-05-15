@@ -16,7 +16,7 @@ def resize_facade(
     Returns:
         tuple: (resized_img, resized_mask)
     """
-    height, width = mask.shape
+    height, width = img.shape[:-1]
     output_shape = (int(width * resizing_factor), int(height * resizing_factor))
     resized_img = cv2.resize(img, output_shape)
     resized_mask = cv2.resize(mask, output_shape, interpolation=cv2.INTER_NEAREST)
