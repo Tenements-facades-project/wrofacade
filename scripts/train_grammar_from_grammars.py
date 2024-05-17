@@ -15,21 +15,21 @@ from src.utils.dataset_metadata import SEGFACADEDataset
 
 
 input_grammars_paths = [
-    'checkpoints_1/checkpoint_150.pickle',
-    'checkpoints_2/checkpoint_150.pickle',
-    'checkpoints_3/checkpoint_150.pickle'
+    "checkpoints_1/checkpoint_150.pickle",
+    "checkpoints_2/checkpoint_150.pickle",
+    "checkpoints_3/checkpoint_150.pickle",
 ]
 
 imgs_dirs = [
-    'input_data/input_1/b',
-    'input_data/input_2/b',
-    'input_data/input_3/b',
+    "input_data/input_1/b",
+    "input_data/input_2/b",
+    "input_data/input_3/b",
 ]
 
 masks_dirs = [
-    'input_data/input_1/a',
-    'input_data/input_2/a',
-    'input_data/input_3/a',
+    "input_data/input_1/a",
+    "input_data/input_2/a",
+    "input_data/input_3/a",
 ]
 
 window_labels = [2, 4]
@@ -37,7 +37,9 @@ background_label = 0
 downsampling_factor = 0.17
 
 
-def load_facade_and_mask(facade_name: str, imgs_dir, masks_dir) -> tuple[np.ndarray, np.ndarray]:
+def load_facade_and_mask(
+    facade_name: str, imgs_dir, masks_dir
+) -> tuple[np.ndarray, np.ndarray]:
     img = cv2.imread(os.path.join(imgs_dir, f"{facade_name}.png"))
     mask = cv2.imread(os.path.join(masks_dir, f"{facade_name}.png"))
     if img is None:
@@ -90,13 +92,18 @@ def get_best_parse_tree(lattice: Lattice) -> Tree:
     return trees[np.argmin(trees_losses)]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # load images and masks
-    facades: list[tuple[np.ndarray , np.ndarray]] = []
+    facades: list[tuple[np.ndarray, np.ndarray]] = []
     for imgs_dir, masks_dir in zip(imgs_dirs, masks_dirs):
         facades_names = [os.path.splitext(fname)[0] for fname in os.listdir(imgs_dir)]
-        facades += [load_facade_and_mask(facade_name=facade_name, imgs_dir=imgs_dir, masks_dir=masks_dir) for facade_name in tqdm(facades_names)]
+        facades += [
+            load_facade_and_mask(
+                facade_name=facade_name, imgs_dir=imgs_dir, masks_dir=masks_dir
+            )
+            for facade_name in tqdm(facades_names)
+        ]
     print(f"Loaded f{len(facades)} facades")
 
     # downsample facade's images and masks
@@ -112,8 +119,10 @@ if __name__ == '__main__':
 
     print("Masks converting ...")
     metadata = SEGFACADEDataset()
-    downsampled_facades = [(img, metadata.parse_segmentation_image(mask))
-                           for img, mask in tqdm(downsampled_facades)]
+    downsampled_facades = [
+        (img, metadata.parse_segmentation_image(mask))
+        for img, mask in tqdm(downsampled_facades)
+    ]
 
     # crop facades
 
@@ -160,7 +169,7 @@ if __name__ == '__main__':
     print("Input grammars loading")
     input_grammars = []
     for path in tqdm(input_grammars_paths):
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             input_grammars.append(pickle.load(f))
 
     # merge into one grammar
@@ -168,18 +177,14 @@ if __name__ == '__main__':
 
     # train
     print("Training")
-    merger = BayesianMerger(
-        n_random_draws=80,
-        w=2.0,
-        strategy="random_draw"
-    )
+    merger = BayesianMerger(n_random_draws=80, w=2.0, strategy="random_draw")
     grammar, loss_val = merger.perform_merging(
         grammar=grammar,
         lattices=lattices,
         n_epochs=100,
-        checkpoint_dir='checkpoints_final',
+        checkpoint_dir="checkpoints_final",
         checkpoint_every_n=5,
     )
 
-    with open('final_grammar.pickle', "wb") as f:
+    with open("final_grammar.pickle", "wb") as f:
         pickle.dump(grammar, f)

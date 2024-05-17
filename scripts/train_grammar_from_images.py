@@ -107,8 +107,10 @@ if __name__ == "__main__":
 
     print("Masks converting ...")
     metadata = SEGFACADEDataset()
-    downsampled_facades = [(img,  metadata.parse_segmentation_image(mask))
-                           for img, mask in tqdm(downsampled_facades)]
+    downsampled_facades = [
+        (img, metadata.parse_segmentation_image(mask))
+        for img, mask in tqdm(downsampled_facades)
+    ]
 
     # crop facades
 
