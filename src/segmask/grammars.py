@@ -1,7 +1,7 @@
 import pickle
 from PIL import Image
 from pydantic import ValidationError
-from seg_mask import SegMaskGenerator
+from .seg_mask import SegMaskGenerator
 from src.utils.grammars_utils.ascfg import Grammar
 from src.utils.segmentation_mask import SegmentationMask
 
