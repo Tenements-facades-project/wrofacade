@@ -3,9 +3,9 @@ import os
 from collections import OrderedDict
 import torch
 
-from utils.imgtrans_utils import networks
-from utils.imgtrans_utils.image_processing import img_to_tensor, tensor_to_img
-from img_translator import ImageTranslator
+from src.utils.imgtrans_utils import networks
+from src.utils.imgtrans_utils.image_processing import img_to_tensor, tensor_to_img
+from .img_translator import ImageTranslator
 # from image_processing import img_to_tensor, tensor_to_img
 
 class Pix2PixModel(ImageTranslator):

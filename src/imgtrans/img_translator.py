@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 import torch
 import os
-from utils.imgtrans_utils import networks
+from src.utils.imgtrans_utils import networks
 
 class ImageTranslator(ABC):
     """Abstract class for image translation models.
