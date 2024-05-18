@@ -1,16 +1,12 @@
 import os
 import pickle
 import numpy as np
-import cv2
 from tqdm import tqdm
-from treelib import Tree
 
 from src.utils.grammars_utils.ascfg import merge_grammars
 from src.utils.grammars_utils.bayesian_merging import BayesianMerger
 from src.utils.lattice_utils.data_manipulations import resize_facade, crop_facade
-from src.utils.lattice_utils.split_lines import infer_split_lines
-from src.utils.lattice_utils.lattice import Lattice
-from src.utils.grammars_utils.general_grammar import Facade, parse_facade, get_tree_loss
+from src.utils.grammars_utils.training_utils import load_facade_and_mask, get_facade_lattice
 from src.utils.dataset_metadata import SEGFACADEDataset
 
 
@@ -35,61 +31,6 @@ masks_dirs = [
 window_labels = [2, 4]
 background_label = 0
 downsampling_factor = 0.17
-
-
-def load_facade_and_mask(
-    facade_name: str, imgs_dir, masks_dir
-) -> tuple[np.ndarray, np.ndarray]:
-    img = cv2.imread(os.path.join(imgs_dir, f"{facade_name}.png"))
-    mask = cv2.imread(os.path.join(masks_dir, f"{facade_name}.png"))
-    if img is None:
-        raise ValueError(
-            f"There's no image of facade {facade_name} in provided imgs directory"
-        )
-    if mask is None:
-        raise ValueError(
-            f"There's no mask of facade {facade_name} in provided masks directory"
-        )
-    return img, mask[:, :, ::-1]
-
-
-def remove_margin(l: list[int], left_margin: int, right_margin: int) -> list[int]:
-    return [x for x in l if ((x > left_margin) and (x < right_margin))]
-
-
-def get_facade_lattice(
-    img: np.ndarray,
-    mask: np.ndarray,
-    dbscan_eps: int,
-    dbscan_min_samples: int,
-    margin: int,
-    min_change_coef: float,
-) -> Lattice:
-    hor_lines_inds, ver_lines_inds = infer_split_lines(
-        mask=mask,
-        dbscan_params={"eps": dbscan_eps, "min_samples": dbscan_min_samples},
-        min_change_coef=min_change_coef,
-    )
-    hor_lines_inds = remove_margin(hor_lines_inds, margin, mask.shape[0] - margin)
-    ver_lines_inds = remove_margin(ver_lines_inds, margin, mask.shape[1] - margin)
-    return Lattice.from_lines(
-        img=img,
-        mask=mask,
-        horizontal_lines_inds=hor_lines_inds,
-        vertical_lines_inds=ver_lines_inds,
-    )
-
-
-def get_best_parse_tree(lattice: Lattice) -> Tree:
-    facade_nt = Facade(
-        lattice=lattice,
-        max_ground_floor=0.3,
-        n_possible_splits=3,
-        window_labels=window_labels,
-    )
-    trees = parse_facade(facade_nt, max_depth=-1)
-    trees_losses = [get_tree_loss(tree) for tree in trees]
-    return trees[np.argmin(trees_losses)]
 
 
 if __name__ == "__main__":
