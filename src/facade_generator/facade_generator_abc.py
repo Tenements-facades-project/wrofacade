@@ -4,7 +4,7 @@ from imgtrans.pix2pix import Pix2PixModel
 from segmask.seg_mask import SegMaskGenerator
 from config.hparam import hparam as hp
 
-class FacadeGenerator(ABC):
+class FacadeGenerator():
     """Class for FacadeGenerator.
     Class takes model names as arguments, and depending on the model provided builds a generation pipeline.
     

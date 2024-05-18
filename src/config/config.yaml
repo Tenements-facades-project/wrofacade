@@ -1,7 +1,7 @@
 checkpoints_dir: 'utils/checkpoints' # models are stored here
 device: 'cpu' # [cpu | cuda | mps]
 
----
+--- 
 translator:
   isTrain: False # set training mode
   gan_mode: 'vanilla' # the type of GAN objective, supports vanilla, lsgan, and wgangp
@@ -48,5 +48,7 @@ translator:
 ---
 segmentator:
   
+---
+grammars:
   
     
