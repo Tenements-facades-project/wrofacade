@@ -83,7 +83,7 @@ class BayesianMerger:
         if same_reachable_df.shape[0] == 0:
             # no compatible nonterminal
             # try once again
-            return self.__random_merge(grammar)
+            return self.__random_merge(grammar, nonterminals_df)
         nonterm_2_id, nonterm_2 = self.__get_random_nonterminal(same_reachable_df)
 
         new_nonterm_id = uuid.uuid4()
