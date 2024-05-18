@@ -3,6 +3,7 @@ from collections import OrderedDict
 import torch
 import os
 from src.utils.imgtrans_utils import networks
+from src.utils.segmentation_mask import SegmentationMask
 
 class ImageTranslator(ABC):
     """Abstract class for image translation models.
@@ -25,16 +26,14 @@ class ImageTranslator(ABC):
             -- self.model_names (str list):         define networks used in our training.
             -- self.optimizers (optimizer list):    define and initialize optimizers. You can define one optimizer for each network. If two networks are updated at the same time, you can use itertools.chain to group them. See cycle_gan_model.py for an example.
         """
-        self.opt = opt
-        self.isTrain = opt.translator.isTrain
-        self.device = torch.device(f"{opt.device}" if opt.device in ['cpu', 'cuda', 'mps'] else 'cpu')
-        self.save_dir = os.path.join(opt.checkpoints_dir)  # save all the checkpoints to save_dir
-        if opt.translator.preprocess != 'scale_width':  # with [scale_width], input images might have different sizes, which hurts the performance of cudnn.benchmark.
-            torch.backends.cudnn.benchmark = True
         self.loss_names = []
         self.model_names = []
         self.optimizers = []
         self.metric = 0  # used for learning rate policy 'plateau'
+        self.save_dir = opt.translator.checkpoints_dir
+        self.device = opt.device
+        self.isTrain = opt.translator.isTrain
+        self.opt = opt
 
     @abstractmethod
     def forward(self):
@@ -51,30 +50,25 @@ class ImageTranslator(ABC):
         pass
 
     @abstractmethod
-    def optimize_parameters(self):
-        """Calculate losses, gradients, and update network weights; called in every training iteration"""
-        pass
-
-    @abstractmethod
-    def pass_image(self, img):
+    def pass_image(self, img: SegmentationMask):
         """Generates fake image given a tensor
         Parameters:
-            img (PIL.Image) -- image to translate 
+            img (SegmentationMask) -- image to translate 
         """
         pass
 
-    def setup(self, opt):
+    def setup(self):
         """Load and print networks; create schedulers
 
         Parameters:
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         if self.isTrain:
-            self.schedulers = [networks.get_scheduler(optimizer, opt) for optimizer in self.optimizers]
-        if not self.isTrain or opt.translator.continue_train:
-            load_suffix = 'iter_%d' % opt.translator.load_iter if opt.translator.load_iter > 0 else opt.translator.epoch
+            self.schedulers = [networks.get_scheduler(optimizer, self.opt) for optimizer in self.optimizers]
+        if not self.isTrain or self.opt.translator.continue_train:
+            load_suffix = 'iter_%d' % self.opt.translator.load_iter if self.opt.translator.load_iter > 0 else self.opt.translator.load_epoch
             self.load_networks(load_suffix)
-        self.print_networks(opt.translator.verbose)
+        self.print_networks(self.opt.translator.verbose)
 
     def eval(self):
         """Make models eval mode during test time"""
@@ -157,7 +151,6 @@ class ImageTranslator(ABC):
                 net = getattr(self, 'net' + name)
                 if isinstance(net, torch.nn.DataParallel):
                     net = net.module
-                print('loading the model from %s' % load_path)
                 # if you are using PyTorch newer than 0.4 (e.g., built from
                 # GitHub source), you can remove str() on self.device
                 state_dict = torch.load(load_path, map_location=str(self.device))
