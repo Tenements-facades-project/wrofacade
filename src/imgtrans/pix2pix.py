@@ -57,8 +57,7 @@ class Pix2PixModel(ImageTranslator):
             img (SegmentationMask) -- image to translate 
         """
         # converting image to tensor
-        # img = img.get_rgb_mask()
-        img = Image.open("Kopia curie-sklodowskiej_47norwida.png").convert('RGB')
+        img = img.get_rgb_mask()
         img = img_to_tensor(img, self.opt)
         self.real_A = img.unsqueeze(0)
 
