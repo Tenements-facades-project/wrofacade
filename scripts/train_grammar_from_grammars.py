@@ -6,7 +6,10 @@ from tqdm import tqdm
 from src.utils.grammars_utils.ascfg import merge_grammars
 from src.utils.grammars_utils.bayesian_merging import BayesianMerger
 from src.utils.lattice_utils.data_manipulations import resize_facade, crop_facade
-from src.utils.grammars_utils.training_utils import load_facade_and_mask, get_facade_lattice
+from src.utils.grammars_utils.training_utils import (
+    load_facade_and_mask,
+    get_facade_lattice,
+)
 from src.utils.dataset_metadata import SEGFACADEDataset
 
 

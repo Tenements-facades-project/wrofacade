@@ -7,7 +7,11 @@ from tqdm import tqdm
 from src.utils.grammars_utils.ascfg import Grammar, merge_grammars
 from src.utils.grammars_utils.bayesian_merging import BayesianMerger
 from src.utils.lattice_utils.data_manipulations import resize_facade, crop_facade
-from src.utils.grammars_utils.training_utils import load_facade_and_mask, get_facade_lattice, get_best_parse_tree
+from src.utils.grammars_utils.training_utils import (
+    load_facade_and_mask,
+    get_facade_lattice,
+    get_best_parse_tree,
+)
 from src.utils.dataset_metadata import SEGFACADEDataset
 
 
@@ -33,7 +37,12 @@ if __name__ == "__main__":
 
     print("Loading images and masks of facades ...")
     facades_names = [os.path.splitext(fname)[0] for fname in os.listdir(args.imgs_dir)]
-    facades = [load_facade_and_mask(facade_name, imgs_dir=args.imgs_dir, masks_dir=args.masks_dir) for facade_name in tqdm(facades_names)]
+    facades = [
+        load_facade_and_mask(
+            facade_name, imgs_dir=args.imgs_dir, masks_dir=args.masks_dir
+        )
+        for facade_name in tqdm(facades_names)
+    ]
     print(f"Loaded {len(facades)} facades")
 
     # downsample facade's images and masks
@@ -98,7 +107,10 @@ if __name__ == "__main__":
     # create parse trees from lattices
 
     print("Creating parse trees of facades from lattices ...")
-    general_parse_trees = [get_best_parse_tree(lattice, window_labels=args.window_labels) for lattice in tqdm(lattices)]
+    general_parse_trees = [
+        get_best_parse_tree(lattice, window_labels=args.window_labels)
+        for lattice in tqdm(lattices)
+    ]
 
     # create ASCFG grammar from facades
 
