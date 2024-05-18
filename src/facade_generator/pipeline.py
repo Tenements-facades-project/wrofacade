@@ -21,7 +21,9 @@ class SegmentAndTranslate:
         self.image_translator = image_translator_cls(hp)
 
     def generate_facade(self, params = None):
-        
+        """Function to run the pipeline
+        Args:
+            params -- anything that can be used in the segmentation model, e.g., facade image to segment """
         segmentated_image = self.segmentation_model.generate_mask(params) # return SegmentationMask class
         generated_facade = self.image_translator.pass_image(segmentated_image)
 

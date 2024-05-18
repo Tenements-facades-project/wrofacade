@@ -1,6 +1,4 @@
 import importlib
-import os
-print(os.getcwd())
 from src.imgtrans.img_translator import ImageTranslator
 from src.segmask.seg_mask import SegMaskGenerator
 from typing import Type
@@ -34,7 +32,3 @@ def find_trans_model_using_name(name: str = "pix2pix") -> Type[ImageTranslator]:
     if model is  None:
         raise KeyError("Model not found")
     return model
-
-if __name__ == "__main__":
-    model = find_trans_model_using_name()
-    print(model)
