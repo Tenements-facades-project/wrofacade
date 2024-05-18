@@ -1,3 +1,5 @@
+import json
+from typing import Any
 import pickle
 from PIL import Image
 from pydantic import ValidationError
@@ -10,9 +12,8 @@ class GrammarMaskGenerator(SegMaskGenerator):
     """Class for generating new segmentation mask using
     trained stochastic grammar (ASCFG)
 
-    Args:
-        grammar_or_path: Grammar object or path to pickle file
-            with Grammar object
+    Attributes:
+        grammar: Grammar object to generate masks with
         label2clr: dictionary containing class labels and colours, keys' positional index
             in the dict corresponds to the class id, e.g. {'window': [255,244,233]}
         n_attempts: maximum number of attempts to generate mask
@@ -21,17 +22,13 @@ class GrammarMaskGenerator(SegMaskGenerator):
 
     def __init__(
         self,
-        grammar_or_path: Grammar | str,
-        label2clr: dict[str, list[int]],
-        n_attempts: int = 20,
+        hp: dict[str, Any],
     ):
         super().__init__()
-        if isinstance(grammar_or_path, Grammar):
-            self.grammar = grammar_or_path
-        else:
-            self.__load_grammar_from_file(grammar_or_path)
-        self.label2clr: dict[str, list[int]] = label2clr
-        self.n_attempts: int = n_attempts
+        self.__load_grammar_from_file(hp["grammars_masks"]["grammar_pickle_path"])
+        with open(hp["label2clr_path"]) as f:
+            self.label2clr: dict[str, list[int]] = json.load(f)
+        self.n_attempts: int = hp["grammars_masks"]["n_attempts"]
 
     def __load_grammar_from_file(self, file_path: str):
         """Loads Grammar object from pickle
