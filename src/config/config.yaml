@@ -1,5 +1,6 @@
 checkpoints_dir: 'utils/checkpoints' # models are stored here
 device: 'cpu' # [cpu | cuda | mps]
+label2clr_path: "label2clr.json"
 
 --- 
 translator:
@@ -49,6 +50,6 @@ translator:
 segmentator:
   
 ---
-grammars:
-  
-    
+grammars_masks:
+  grammar_pickle_path: "checkpoints_final/checkpoint_20.pickle"
+  n_attempts: 20
