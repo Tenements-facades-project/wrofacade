@@ -40,7 +40,7 @@ class GrammarMaskGenerator(SegMaskGenerator):
             raise RuntimeError("Provided pickle file does not contain grammar object!")
         self.grammar = grammar
 
-    def generate_mask(self) -> SegmentationMask:
+    def generate_mask(self, args: dict) -> SegmentationMask:
         """Generates new segmentation mask using grammar
 
         Returns:
