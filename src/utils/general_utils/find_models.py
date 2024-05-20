@@ -5,7 +5,7 @@ from typing import Type
 
 def find_seg_model_using_name(name: str = "transformers_seg") -> Type[SegMaskGenerator]:
     """Class for loading segmentation model from model name"""
-    model_filename = "segmask." + name 
+    model_filename = "src.segmask." + name
     modellib = importlib.import_module(model_filename)
     model = None
     for name, cls in modellib.__dict__.items():

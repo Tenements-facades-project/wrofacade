@@ -60,6 +60,8 @@ class GrammarMaskGenerator(SegMaskGenerator):
                 )
             except ValidationError:
                 pass
+            except ValueError:
+                pass
         raise RuntimeError(
             "Maximum number of unsuccessful attempts reached when trying"
             "to generate mask"

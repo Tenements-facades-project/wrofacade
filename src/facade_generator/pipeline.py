@@ -1,5 +1,5 @@
-from utils.general_utils.find_models import find_seg_model_using_name, find_trans_model_using_name
-from config.hparam import hparam as hp
+from src.utils.general_utils.find_models import find_seg_model_using_name, find_trans_model_using_name
+from src.config.hparam import hparam as hp
 
 class SegmentAndTranslate:
     """Class for generating facades using the two modules: segmentation and image translation
