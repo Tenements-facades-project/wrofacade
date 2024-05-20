@@ -17,7 +17,7 @@ translator:
   init_gain: 0.02 # scaling factor for normal, xavier and orthogonal.
   no_dropout: True # no dropout for the generator
   save_by_iter: True # whether saves model by iteration
-  load_epoch: 200 # which epoch to load model from when generating images
+  load_epoch: 250 # which epoch to load model from when generating images
   load_iter: 0
   verbose: False 
   # dataset parameters
