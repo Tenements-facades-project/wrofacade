@@ -1,6 +1,20 @@
 checkpoints_dir: 'utils/checkpoints' # models are stored here
 device: 'cpu' # [cpu | cuda | mps]
 
+---
+label2clr: 
+  noise: [  0]
+  door: [  110]
+  window: [  240]
+  portal: [  200]
+  window_casing: [  250]
+  pediment: [  230]
+  cornice/horizontal_element: [  80]
+  pilaster/vertical_element: [  60]
+  balcony: [  140]
+  roof: [  160]
+  detail: [  180]
+  wall: [  30]
 --- 
 translator:
   isTrain: False # set training mode
@@ -47,7 +61,10 @@ translator:
 
 ---
 segmentator:
-  
+  model_name_or_path: 'Tenements-facades-project/segfacade_model'
+  local_files_only: False
+  device: 'cuda'
+
 ---
 grammars:
   
