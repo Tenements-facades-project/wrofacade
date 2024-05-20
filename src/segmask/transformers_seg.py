@@ -1,4 +1,4 @@
-from seg_mask import SegMaskGenerator
+from src.segmask.seg_mask import SegMaskGenerator
 from transformers import SegformerForSemanticSegmentation
 import torch
 from torchvision.transforms.functional import pil_to_tensor
@@ -38,16 +38,16 @@ class TransSegmentationHF(SegMaskGenerator):
         if hp['device'] is None:
             self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         else:
-            if isinstance(torch.device, hp['device']):
+            if isinstance(hp['device'], torch.device):
                 self.device = hp['device'] 
-            elif isinstance(str, hp['device']):
+            elif isinstance(hp['device'], str):
                 self.device = torch.device(hp['device'])
             else:
                 raise Exception('Wrong device name')
 
         self.model = SegformerForSemanticSegmentation.from_pretrained(
-            pretrained_model_name_or_path = hp['model_name_or_path'], 
-            local_files_only = hp['local_files_only']
+            pretrained_model_name_or_path = hp['segmentator']['model_name_or_path'], 
+            local_files_only = hp['segmentator']['local_files_only']
             )
         
         self.label2clr = hp['label2clr']
