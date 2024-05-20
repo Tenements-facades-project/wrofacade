@@ -12,47 +12,52 @@ class TransSegmentationHF(SegMaskGenerator):
 
     Link to paper https://arxiv.org/abs/2105.15203
     """
+        
 
-    def __init__(self, model_name_or_path: str, 
-                 label2clr: dict[str, list[int]],
-                 local_files_only:bool = False, 
-                 device: torch.device = None) -> None:
+    def __init__(self, hp: dict) -> None:
         """Initialize the TransSegmentationHF class.
 
         Parameters:
-            model_name_or_path  -- string containing name or path to the model,
-                          if string is an existing path the model is loaded from drive
-                          if not the model will be looked up on Hugging 
-                          Face platform
-            
-            label2clr -- dictionary containing class labels and colours, keys' positional index
-                        in the dict corresponds to the class id, e.g. {'window': [255,244,233]}
+            hp - dictionary containing parametres with next entries:
+                'model_name_or_path':str  -- string containing name or path to the model,
+                            if string is an existing path the model is loaded from drive
+                            if not the model will be looked up on Hugging 
+                            Face platform
+                
+                'label2clr':dict[str,list] -- dictionary containing class labels and colours, keys' positional index
+                            in the dict corresponds to the class id, e.g. {'window': [255,244,233]}
 
-            local_files_only - boolean flag. If True the model wouldn't be looked
-                          up and downloaded from Hugging Face platform and instead
-                          it would be looked up only locally
-            
-            device -- torch.device object. If not provided will use CUDA if avaliable,
-                      if not CPU will be used
+                'local_files_only':boolean - boolean flag. If True the model wouldn't be looked
+                            up and downloaded from Hugging Face platform and instead
+                            it would be looked up only locally
+                
+                'device':torch.device|str -- torch.device object. If not provided will use CUDA if avaliable,
+                        if not CPU will be used
         """
 
-        if device is None:
-            device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        if hp['device'] is None:
+            self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         else:
-            self.device = device 
+            if isinstance(torch.device, hp['device']):
+                self.device = hp['device'] 
+            elif isinstance(str, hp['device']):
+                self.device = torch.device(hp['device'])
+            else:
+                raise Exception('Wrong device name')
 
         self.model = SegformerForSemanticSegmentation.from_pretrained(
-            pretrained_model_name_or_path = model_name_or_path, 
-            local_files_only = local_files_only
+            pretrained_model_name_or_path = hp['model_name_or_path'], 
+            local_files_only = hp['local_files_only']
             )
         
-        self.label2clr = label2clr
+        self.label2clr = hp['label2clr']
 
-    def forward(self, image:Image) -> SegmentationMask:
+    def generate_mask(self, args: dict) -> SegmentationMask:
         """Get a segmentation mask for the provided image.
 
         Parameters:
-            image -- a PIL RGB image of a facade
+            args -- dictionary containing next entries:
+                'image':PIL.Image -- a PIL RGB image of a facade
         
         Returns:
             segmentation_mask - a segmentation mask object
@@ -60,6 +65,8 @@ class TransSegmentationHF(SegMaskGenerator):
         Raises:
             ValueError - if input PIL image is not in the RGB format
         """
+
+        image = args['image']
 
         if ''.join(image.getbands()).lower() != 'rgb':
             raise ValueError('Image is not in RGB format')
