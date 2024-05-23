@@ -227,6 +227,7 @@ class ProductionRule:
         else:
             new_bounds.append((cur_lower_bound, segments_bounds[-1][1]))
             new_rhs.append(rhs[-1])
+        return new_bounds, tuple(new_rhs)
 
 
     def choose_attribute_idx(self) -> int:
