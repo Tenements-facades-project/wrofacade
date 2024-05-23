@@ -214,12 +214,17 @@ class ProductionRule:
         ids_to_remove = [i for i, segment_len in enumerate(segments_lengths) if segment_len < 2]
         if not ids_to_remove:
             return segments_bounds, rhs
+        if len(ids_to_remove) == len(segments_lengths):
+            return (
+                [(segments_bounds[0][0], segments_bounds[-1][1])],
+                (rhs[0],)
+            )
         new_bounds, new_rhs = [], []
         cur_lower_bound = 0
         for i, (segment, segment_id) in enumerate(zip(segments_bounds[:-1], rhs[:-1])):
             if i not in ids_to_remove:
                 lower_bound, higher_bound = segment
-                new_bounds.append(cur_lower_bound, higher_bound)
+                new_bounds.append((cur_lower_bound, higher_bound))
                 new_rhs.append(segment_id)
                 cur_lower_bound = higher_bound
         if (len(segments_bounds) - 1) in ids_to_remove:
