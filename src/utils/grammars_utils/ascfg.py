@@ -228,7 +228,7 @@ class ProductionRule:
                 new_rhs.append(segment_id)
                 cur_lower_bound = higher_bound
         if (len(segments_bounds) - 1) in ids_to_remove:
-            new_bounds[-1][1] = segments_bounds[-1][1]
+            new_bounds[-1] = new_bounds[-1][0] + segments_bounds[-1][1]
         else:
             new_bounds.append((cur_lower_bound, segments_bounds[-1][1]))
             new_rhs.append(rhs[-1])
