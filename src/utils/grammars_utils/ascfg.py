@@ -210,15 +210,17 @@ class ProductionRule:
         Returns:
             tuple: (cleaned_segments, cleaned_segments_ids)
         """
-        segments_lengths = [segment_end - segment_start for segment_start, segment_end in segments_bounds]
-        ids_to_remove = [i for i, segment_len in enumerate(segments_lengths) if segment_len < 2]
+        segments_lengths = [
+            segment_end - segment_start
+            for segment_start, segment_end in segments_bounds
+        ]
+        ids_to_remove = [
+            i for i, segment_len in enumerate(segments_lengths) if segment_len < 2
+        ]
         if not ids_to_remove:
             return segments_bounds, rhs
         if len(ids_to_remove) == len(segments_lengths):
-            return (
-                [(segments_bounds[0][0], segments_bounds[-1][1])],
-                (rhs[0],)
-            )
+            return ([(segments_bounds[0][0], segments_bounds[-1][1])], (rhs[0],))
         new_bounds, new_rhs = [], []
         cur_lower_bound = 0
         for i, (segment, segment_id) in enumerate(zip(segments_bounds[:-1], rhs[:-1])):
@@ -228,12 +230,11 @@ class ProductionRule:
                 new_rhs.append(segment_id)
                 cur_lower_bound = higher_bound
         if (len(segments_bounds) - 1) in ids_to_remove:
-            new_bounds[-1] = (new_bounds[-1][0], ) + (segments_bounds[-1][1], )
+            new_bounds[-1] = (new_bounds[-1][0],) + (segments_bounds[-1][1],)
         else:
             new_bounds.append((cur_lower_bound, segments_bounds[-1][1]))
             new_rhs.append(rhs[-1])
         return new_bounds, tuple(new_rhs)
-
 
     def choose_attribute_idx(self) -> int:
         """Choose randomly index i,
@@ -268,15 +269,15 @@ class ProductionRule:
         if not attribute_idx:
             attribute_idx = self.choose_attribute_idx()
         if self.split_direction == "horizontal":
-            new_segments, new_rhs = self.__clean_area_division(self.__divide_area(
-                lower_bound=box.up,
-                higher_bound=box.down,
-                attribute=self.attributes[attribute_idx],
-            ),
-                self.rhs
+            new_segments, new_rhs = self.__clean_area_division(
+                self.__divide_area(
+                    lower_bound=box.up,
+                    higher_bound=box.down,
+                    attribute=self.attributes[attribute_idx],
+                ),
+                self.rhs,
             )
-            for (segment_up, segment_down), symbol_id in zip(
-                new_segments, new_rhs):
+            for (segment_up, segment_down), symbol_id in zip(new_segments, new_rhs):
                 boxes.append(
                     ImgBox(
                         left=box.left,
@@ -288,12 +289,14 @@ class ProductionRule:
                     )
                 )
         else:
-            new_segments, new_rhs = self.__clean_area_division(self.__divide_area(
-                lower_bound=box.left,
-                higher_bound=box.right,
-                attribute=self.attributes[attribute_idx],
-            ),
-            self.rhs)
+            new_segments, new_rhs = self.__clean_area_division(
+                self.__divide_area(
+                    lower_bound=box.left,
+                    higher_bound=box.right,
+                    attribute=self.attributes[attribute_idx],
+                ),
+                self.rhs,
+            )
             for (segment_left, segment_right), symbol_id in zip(new_segments, new_rhs):
                 boxes.append(
                     ImgBox(
@@ -635,7 +638,9 @@ class Grammar:
         return Grammar(nonterminals=nonterminals, terminals=terminals, rules=rules)
 
     def get_all_rules_for_lhs(
-        self, lhs: UUID | str, rule_chooser: Callable[[ProductionRule], bool] = lambda x: True,
+        self,
+        lhs: UUID | str,
+        rule_chooser: Callable[[ProductionRule], bool] = lambda x: True,
     ) -> tuple[list[ProductionRule | StartProduction] | None, list[float] | None]:
         """Given ID of a nonterminal ('lhs'),
         returns a subset of all rules from the grammar that are applicable
@@ -670,21 +675,27 @@ class Grammar:
         return rules_for_lhs, rules_probs_for_lhs
 
     def get_rule_for_lhs(
-        self, lhs: UUID | str, rule_chooser: Callable[[ProductionRule], bool] = lambda x: True,
+        self,
+        lhs: UUID | str,
+        rule_chooser: Callable[[ProductionRule], bool] = lambda x: True,
     ) -> tuple[ProductionRule | StartProduction | None, float | None]:
         """Chooses a production rule from the grammar
         that is applicable to a nonterminal;
         the rule is chosen randomly, according to
         rules probabilities
         """
-        rules_for_lhs, rules_probs_for_lhs = self.get_all_rules_for_lhs(lhs, rule_chooser=rule_chooser)
+        rules_for_lhs, rules_probs_for_lhs = self.get_all_rules_for_lhs(
+            lhs, rule_chooser=rule_chooser
+        )
         if not rules_for_lhs:
             return None, None
         rng = np.random.default_rng()
         idx = rng.choice(len(rules_for_lhs), p=rules_probs_for_lhs)
         return rules_for_lhs[idx], rules_probs_for_lhs[idx]
 
-    def generate_parse_tree(self, rules_choosers: dict[int, Callable[[ProductionRule], bool]] | None = None) -> ParseTree:
+    def generate_parse_tree(
+        self, rules_choosers: dict[int, Callable[[ProductionRule], bool]] | None = None
+    ) -> ParseTree:
         """Performs production of the grammar
 
         Start shape is generated with one of the starting rules that are
@@ -696,12 +707,15 @@ class Grammar:
         Returns:
             ParseTree: result parse tree object
         """
+
         if rules_choosers is None:
             rules_choosers = dict()
 
         # get start production and create ParseTree object
         start_rule_chooser = rules_choosers.get(0, lambda x: True)
-        start_rule, start_rule_prob = self.get_rule_for_lhs("START", rule_chooser=start_rule_chooser)
+        start_rule, start_rule_prob = self.get_rule_for_lhs(
+            "START", rule_chooser=start_rule_chooser
+        )
         if start_rule is None:
             raise ValueError("No start rule satisfying given condition")
         parse_tree = ParseTree(
@@ -720,11 +734,22 @@ class Grammar:
                 rule, rule_prob, rule_attribute_idx = None, None, None
 
             else:
+                # get the level in tree in which node will be created
+                level = (
+                    parse_tree.level(parent_id) if parent_id is not None else -1
+                ) + 2
+
                 # get the symbol from the grammar
                 symbol = self.nonterminals[box.symbol_id]
 
                 # get the rule from the grammar and its attribute
-                rule, rule_prob = self.get_rule_for_lhs(box.symbol_id)
+                rule, rule_prob = self.get_rule_for_lhs(
+                    box.symbol_id,
+                    rule_chooser=rules_choosers.get(level, lambda x: True),
+                )
+                if rule is None:
+                    # run function once again
+                    return self.generate_parse_tree(rules_choosers)
                 rule_attribute_idx = (
                     rule.choose_attribute_idx() if rule.rule_type != "lexical" else None
                 )
