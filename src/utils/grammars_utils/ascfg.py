@@ -684,7 +684,7 @@ class Grammar:
         idx = rng.choice(len(rules_for_lhs), p=rules_probs_for_lhs)
         return rules_for_lhs[idx], rules_probs_for_lhs[idx]
 
-    def generate_parse_tree(self) -> ParseTree:
+    def generate_parse_tree(self, rules_choosers: dict[int, Callable[[ProductionRule], bool]] | None = None) -> ParseTree:
         """Performs production of the grammar
 
         Start shape is generated with one of the starting rules that are
@@ -696,8 +696,14 @@ class Grammar:
         Returns:
             ParseTree: result parse tree object
         """
+        if rules_choosers is None:
+            rules_choosers = dict()
+
         # get start production and create ParseTree object
-        start_rule, start_rule_prob = self.get_rule_for_lhs("START")
+        start_rule_chooser = rules_choosers.get(0, lambda x: True)
+        start_rule, start_rule_prob = self.get_rule_for_lhs("START", rule_chooser=start_rule_chooser)
+        if start_rule is None:
+            raise ValueError("No start rule satisfying given condition")
         parse_tree = ParseTree(
             start_production=start_rule, start_production_prob=start_rule_prob
         )
