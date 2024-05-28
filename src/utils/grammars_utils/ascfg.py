@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Literal
+from typing import Literal, Callable
 import uuid
 from uuid import UUID
 import numpy as np
@@ -635,27 +635,51 @@ class Grammar:
         return Grammar(nonterminals=nonterminals, terminals=terminals, rules=rules)
 
     def get_all_rules_for_lhs(
-        self, lhs: UUID | str
-    ) -> tuple[list[ProductionRule | StartProduction], list[float]]:
+        self, lhs: UUID | str, rule_chooser: Callable[[ProductionRule], bool] = lambda x: True,
+    ) -> tuple[list[ProductionRule | StartProduction] | None, list[float] | None]:
         """Given ID of a nonterminal ('lhs'),
-        returns all rules from the grammar that are applicable
+        returns a subset of all rules from the grammar that are applicable
         to this nonterminal (i.e. their LHS is `lhs`)
         along with their probabilities
+
+        Args:
+            lhs: UUID of LHS nonterminal
+            rule_chooser: Callable, getting ProductionRule object as an argument
+                and returning `True` if the rule is accepted and `False` otherwise;
+                all rules are accepted by default
+
+        Returns:
+            tuple: (rules_for_lhs, rules_probs_for_lhs),
+                where rules_for_lhs is a list of all accepted rules with desired LHS
+                nad rules_probs_for_lhs are probabilities of these rules,
+                normalized so that they sum up to 1.0
+                if there's no rule satisfying condition, returns (`None`, `None`)
+
         """
         rules_df_for_lhs = self.rules_df[self.rules_df["lhs"] == lhs]
+        rules_df_for_lhs = rules_df_for_lhs[
+            rules_df_for_lhs["rules"].apply(rule_chooser)
+        ]
+        if rules_df_for_lhs.shape[0] == 0:
+            # no rules satisfying condition
+            return None, None
         rules_for_lhs = rules_df_for_lhs["rules"].tolist()
-        rules_probs_for_lhs = rules_df_for_lhs["rule_prob"].tolist()
+        rules_probs_for_lhs = rules_df_for_lhs["rule_prob"]
+        rules_probs_for_lhs = rules_probs_for_lhs / rules_probs_for_lhs.sum()
+        rules_probs_for_lhs = rules_probs_for_lhs.tolist()
         return rules_for_lhs, rules_probs_for_lhs
 
     def get_rule_for_lhs(
-        self, lhs: UUID | str
-    ) -> tuple[ProductionRule | StartProduction, float]:
+        self, lhs: UUID | str, rule_chooser: Callable[[ProductionRule], bool] = lambda x: True,
+    ) -> tuple[ProductionRule | StartProduction | None, float | None]:
         """Chooses a production rule from the grammar
         that is applicable to a nonterminal;
         the rule is chosen randomly, according to
         rules probabilities
         """
-        rules_for_lhs, rules_probs_for_lhs = self.get_all_rules_for_lhs(lhs)
+        rules_for_lhs, rules_probs_for_lhs = self.get_all_rules_for_lhs(lhs, rule_chooser=rule_chooser)
+        if not rules_for_lhs:
+            return None, None
         rng = np.random.default_rng()
         idx = rng.choice(len(rules_for_lhs), p=rules_probs_for_lhs)
         return rules_for_lhs[idx], rules_probs_for_lhs[idx]
