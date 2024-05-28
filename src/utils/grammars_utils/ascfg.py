@@ -200,6 +200,41 @@ class ProductionRule:
         segments_bounds.append((offset_next, higher_bound))
         return segments_bounds
 
+    @staticmethod
+    def __clean_area_division(
+        segments_bounds: list[tuple[int, int]], rhs: tuple[UUID, ...]
+    ) -> tuple[list[tuple[int, int]], tuple[UUID, ...]]:
+        """Given area division, obtains division that does not
+        contain parts of size lower than 2
+
+        Returns:
+            tuple: (cleaned_segments, cleaned_segments_ids)
+        """
+        segments_lengths = [segment_end - segment_start for segment_start, segment_end in segments_bounds]
+        ids_to_remove = [i for i, segment_len in enumerate(segments_lengths) if segment_len < 2]
+        if not ids_to_remove:
+            return segments_bounds, rhs
+        if len(ids_to_remove) == len(segments_lengths):
+            return (
+                [(segments_bounds[0][0], segments_bounds[-1][1])],
+                (rhs[0],)
+            )
+        new_bounds, new_rhs = [], []
+        cur_lower_bound = 0
+        for i, (segment, segment_id) in enumerate(zip(segments_bounds[:-1], rhs[:-1])):
+            if i not in ids_to_remove:
+                lower_bound, higher_bound = segment
+                new_bounds.append((cur_lower_bound, higher_bound))
+                new_rhs.append(segment_id)
+                cur_lower_bound = higher_bound
+        if (len(segments_bounds) - 1) in ids_to_remove:
+            new_bounds[-1] = (new_bounds[-1][0], ) + (segments_bounds[-1][1], )
+        else:
+            new_bounds.append((cur_lower_bound, segments_bounds[-1][1]))
+            new_rhs.append(rhs[-1])
+        return new_bounds, tuple(new_rhs)
+
+
     def choose_attribute_idx(self) -> int:
         """Choose randomly index i,
         i in [0, len(self.attributes))
@@ -233,14 +268,15 @@ class ProductionRule:
         if not attribute_idx:
             attribute_idx = self.choose_attribute_idx()
         if self.split_direction == "horizontal":
+            new_segments, new_rhs = self.__clean_area_division(self.__divide_area(
+                lower_bound=box.up,
+                higher_bound=box.down,
+                attribute=self.attributes[attribute_idx],
+            ),
+                self.rhs
+            )
             for (segment_up, segment_down), symbol_id in zip(
-                self.__divide_area(
-                    lower_bound=box.up,
-                    higher_bound=box.down,
-                    attribute=self.attributes[attribute_idx],
-                ),
-                self.rhs,
-            ):
+                new_segments, new_rhs):
                 boxes.append(
                     ImgBox(
                         left=box.left,
@@ -252,14 +288,13 @@ class ProductionRule:
                     )
                 )
         else:
-            for (segment_left, segment_right), symbol_id in zip(
-                self.__divide_area(
-                    lower_bound=box.left,
-                    higher_bound=box.right,
-                    attribute=self.attributes[attribute_idx],
-                ),
-                self.rhs,
-            ):
+            new_segments, new_rhs = self.__clean_area_division(self.__divide_area(
+                lower_bound=box.left,
+                higher_bound=box.right,
+                attribute=self.attributes[attribute_idx],
+            ),
+            self.rhs)
+            for (segment_left, segment_right), symbol_id in zip(new_segments, new_rhs):
                 boxes.append(
                     ImgBox(
                         left=segment_left,
