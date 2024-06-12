@@ -15,6 +15,7 @@ from pydantic import (
     NonNegativeInt,
     root_validator,
 )
+import networkx as nx
 
 from ..lattice_utils.lattice import ImgRange
 from .general_grammar import GeneralSymbol, GeneralTerminal, GeneralNonterminal
@@ -529,6 +530,7 @@ class Grammar:
         self.nonterminals: dict[UUID, Nonterminal] = nonterminals
         self.terminals: dict[UUID, terminals] = terminals
         self.rules_df: pd.DataFrame = self.__obtain_rules_df(rules)
+        self.rules_graph: nx.DiGraph | None = None
 
     def __obtain_rules_df(
         self, rules: list[ProductionRule | StartProduction]
@@ -694,7 +696,9 @@ class Grammar:
         return rules_for_lhs[idx], rules_probs_for_lhs[idx]
 
     def generate_parse_tree(
-        self, rules_choosers: dict[int, Callable[[ProductionRule], bool]] | None = None
+        self,
+        rules_choosers: dict[int, Callable[[ProductionRule], bool]] | None = None,
+        rebuild_rules_graph: bool = False,
     ) -> ParseTree:
         """Performs production of the grammar
 
@@ -707,17 +711,55 @@ class Grammar:
         Returns:
             ParseTree: result parse tree object
         """
+        if any(level > 1 for level in rules_choosers.keys()):
+            raise ValueError("Levels greater than 1 are currently not supported")
 
-        if rules_choosers is None:
+        # build rules graph if necessary
+        if self.rules_graph is None or rebuild_rules_graph:
+            self.__build_rules_graph()
+
+        # get start production
+
+        # get all start productions that satisfy all rule choosers
+        if not rules_choosers:
+            start_rule, start_rule_prob = self.get_rule_for_lhs("START")
             rules_choosers = dict()
+        else:
+            rel_start_prods_for_levels = []
+            for chooser_level, chooser_fun in rules_choosers.items():
+                relevant_start_productions_tuple = self.__relevant_start_productions(
+                    chooser_fun=chooser_fun, chooser_level=chooser_level
+                )
+                if relevant_start_productions_tuple is None:
+                    raise RuntimeError("No parse tree satisfying rule chooser")
+                rel_start_prods_for_levels.append(relevant_start_productions_tuple[0])
+            rel_start_prods = (
+                rel_start_prods_for_levels[0]
+                if len(rel_start_prods_for_levels) == 1
+                else list(
+                    set(rel_start_prods_for_levels[0]).intersection(
+                        *rel_start_prods_for_levels[1:]
+                    )
+                )
+            )
+            if not rel_start_prods:
+                raise RuntimeError("No parse tree satisfying all rule choosers")
 
-        # get start production and create ParseTree object
-        start_rule_chooser = rules_choosers.get(0, lambda x: True)
-        start_rule, start_rule_prob = self.get_rule_for_lhs(
-            "START", rule_chooser=start_rule_chooser
-        )
-        if start_rule is None:
-            raise ValueError("No start rule satisfying given condition")
+            # choose start production randomly
+            rel_start_prods_probs = [
+                self.rules_graph.nodes[rule]["rule_prob"] for rule in rel_start_prods
+            ]
+            probs_sum = sum(rel_start_prods_probs)
+            rel_start_prods_probs = [prob / probs_sum for prob in rel_start_prods_probs]
+            chosen_ind = np.random.choice(
+                len(rel_start_prods_probs), p=rel_start_prods_probs
+            )
+            start_rule, start_rule_prob = (
+                rel_start_prods[chosen_ind],
+                rel_start_prods_probs[chosen_ind],
+            )
+
+        # create ParseTree object
         parse_tree = ParseTree(
             start_production=start_rule, start_production_prob=start_rule_prob
         )
@@ -748,8 +790,7 @@ class Grammar:
                     rule_chooser=rules_choosers.get(level, lambda x: True),
                 )
                 if rule is None:
-                    # run function once again
-                    return self.generate_parse_tree(rules_choosers)
+                    raise RuntimeError
                 rule_attribute_idx = (
                     rule.choose_attribute_idx() if rule.rule_type != "lexical" else None
                 )
@@ -812,6 +853,59 @@ class Grammar:
         new_nonterm = Nonterminal(reachable_labels=reachable_labels)
         nonterminals[new_nonterm_id] = new_nonterm
         return Grammar(terminals=self.terminals, nonterminals=nonterminals, rules=rules)
+
+    def __build_rules_graph(self) -> None:
+        """Builds graph of grammar's production rules
+
+        In the graph, nodes correspond to rules. An edge from node i to node j
+        exists if when in grammar production rule i is applied on a terminal N
+        and children nonterminals are obtained: N_1, N_2, ..., N_k,
+        it is possible that the rule j will be applied on one of childs
+        (i.e. rule j is applicable for at least one of nonterminals N_1, N_2, ..., N_k)
+        """
+        rules_graph = nx.DiGraph()
+
+        # create graph's nodes
+        for index, row in self.rules_df.iterrows():
+            rules_graph.add_node(
+                row.loc["rules"],
+                rule_prob=row.loc["rule_prob"],
+                is_start=(row.loc["rule_type"] == "start"),
+            )
+
+        # create graph's edges
+        for index, row in self.rules_df.iterrows():
+            if row.loc["rule_type"] == "lexical":
+                continue
+            for rhs_id in (
+                row.loc["rhs"]
+                if (row.loc["rule_type"] != "start")
+                else (row.loc["rhs"],)
+            ):
+                applicable_rules, applicable_rules_probs = self.get_all_rules_for_lhs(
+                    rhs_id
+                )
+                for rule, rule_prob in zip(applicable_rules, applicable_rules_probs):
+                    rules_graph.add_edge(row.loc["rules"], rule)
+
+        self.rules_graph = rules_graph
+
+    def __relevant_start_productions(
+        self, chooser_fun: Callable[[ProductionRule], bool], chooser_level: int
+    ) -> tuple[list[StartProduction], list[float]] | None:
+        if self.rules_graph is None:
+            raise AssertionError
+        rel_start_rules, rel_start_rules_probs = [], []
+        for start_rule, start_rule_prob in zip(*self.get_all_rules_for_lhs("START")):
+            k_distant_nodes = nx.descendants_at_distance(
+                self.rules_graph, start_rule, chooser_level
+            )
+            if any(chooser_fun(rule) for rule in k_distant_nodes):
+                rel_start_rules.append(start_rule)
+                rel_start_rules_probs.append(start_rule_prob)
+        if not rel_start_rules:
+            return None
+        return rel_start_rules, rel_start_rules_probs
 
 
 def merge_grammars(grammars: list[Grammar]) -> Grammar:
