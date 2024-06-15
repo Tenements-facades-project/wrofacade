@@ -711,6 +711,9 @@ class Grammar:
         Returns:
             ParseTree: result parse tree object
         """
+        if rules_choosers is None:
+            rules_choosers = dict()
+
         if any(level > 1 for level in rules_choosers.keys()):
             raise ValueError("Levels greater than 1 are currently not supported")
 
