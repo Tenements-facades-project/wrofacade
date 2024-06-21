@@ -14,9 +14,9 @@ from src.utils.dataset_metadata import SEGFACADEDataset
 
 
 input_grammars_paths = [
-    "checkpoints_1/checkpoint_150.pickle",
-    "checkpoints_2/checkpoint_150.pickle",
-    "checkpoints_3/checkpoint_150.pickle",
+    "checkpoints_1/checkpoint_100.pickle",
+    "checkpoints_2/checkpoint_100.pickle",
+    "checkpoints_3/checkpoint_100.pickle",
 ]
 
 imgs_dirs = [

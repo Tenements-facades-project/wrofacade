@@ -43,26 +43,53 @@ class GrammarMaskGenerator(SegMaskGenerator):
     def generate_mask(self, args: dict) -> SegmentationMask:
         """Generates new segmentation mask using grammar
 
+        Args:
+            args (dict): keys:
+                n_floors (int, Optional): number of floors in the generated facade
+                    (including ground floor)
+                min_height_width_ratio (float, Optional): minimum height / width ratio
+                    of the generated image
+                max_height_width_ratio (float, Optional): maximum height / width ratio
+                    of the generated image
+
         Returns:
             SegmentationMask: generated mask object
 
-        Raises:
-            RuntimeError: when number of unsuccessful attempts
-                reaches `self.n_attempts`
+        Notes:
+            due to inaccurate parsing tree creation, grammar sometimes fails
+                to create facade with desired number of floors
         """
-        for _ in range(self.n_attempts):
-            try:
-                parse_tree = self.grammar.generate_parse_tree()
-                _, mask = parse_tree.assemble_image()
-                return SegmentationMask(
-                    Image.fromarray(mask, "L"),
-                    label2clr=self.label2clr,
+        n_floors = args.get("n_floors", None)
+        min_height_width_ratio = args.get("min_height_width_ratio", None)
+        max_height_width_ratio = args.get("max_height_width_ratio", None)
+
+        rules_choosers = dict()
+        if n_floors:
+            rules_choosers[1] = lambda rule: len(rule.rhs) == (n_floors + 1)
+        if min_height_width_ratio or max_height_width_ratio:
+            rule_min_ratio = (
+                (
+                    lambda rule: rule.start_shape[0] / rule.start_shape[1]
+                    >= min_height_width_ratio
                 )
-            except ValidationError:
-                pass
-            except ValueError:
-                pass
-        raise RuntimeError(
-            "Maximum number of unsuccessful attempts reached when trying"
-            "to generate mask"
+                if min_height_width_ratio
+                else lambda rule: True
+            )
+            rule_max_ratio = (
+                (
+                    lambda rule: rule.start_shape[0] / rule.start_shape[1]
+                    <= max_height_width_ratio
+                )
+                if max_height_width_ratio
+                else lambda rule: True
+            )
+            rules_choosers[0] = lambda rule: rule_min_ratio(rule) and rule_max_ratio(
+                rule
+            )
+
+        parse_tree = self.grammar.generate_parse_tree(rules_choosers=rules_choosers)
+        _, mask = parse_tree.assemble_image()
+        return SegmentationMask(
+            Image.fromarray(mask, "L"),
+            label2clr=self.label2clr,
         )
