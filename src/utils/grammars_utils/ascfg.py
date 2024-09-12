@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Literal
+from typing import Literal, Callable
 import uuid
 from uuid import UUID
 import numpy as np
@@ -15,6 +15,7 @@ from pydantic import (
     NonNegativeInt,
     root_validator,
 )
+import networkx as nx
 
 from ..lattice_utils.lattice import ImgRange
 from .general_grammar import GeneralSymbol, GeneralTerminal, GeneralNonterminal
@@ -210,15 +211,17 @@ class ProductionRule:
         Returns:
             tuple: (cleaned_segments, cleaned_segments_ids)
         """
-        segments_lengths = [segment_end - segment_start for segment_start, segment_end in segments_bounds]
-        ids_to_remove = [i for i, segment_len in enumerate(segments_lengths) if segment_len < 2]
+        segments_lengths = [
+            segment_end - segment_start
+            for segment_start, segment_end in segments_bounds
+        ]
+        ids_to_remove = [
+            i for i, segment_len in enumerate(segments_lengths) if segment_len < 2
+        ]
         if not ids_to_remove:
             return segments_bounds, rhs
         if len(ids_to_remove) == len(segments_lengths):
-            return (
-                [(segments_bounds[0][0], segments_bounds[-1][1])],
-                (rhs[0],)
-            )
+            return ([(segments_bounds[0][0], segments_bounds[-1][1])], (rhs[0],))
         new_bounds, new_rhs = [], []
         cur_lower_bound = 0
         for i, (segment, segment_id) in enumerate(zip(segments_bounds[:-1], rhs[:-1])):
@@ -228,12 +231,11 @@ class ProductionRule:
                 new_rhs.append(segment_id)
                 cur_lower_bound = higher_bound
         if (len(segments_bounds) - 1) in ids_to_remove:
-            new_bounds[-1] = (new_bounds[-1][0], ) + (segments_bounds[-1][1], )
+            new_bounds[-1] = (new_bounds[-1][0],) + (segments_bounds[-1][1],)
         else:
             new_bounds.append((cur_lower_bound, segments_bounds[-1][1]))
             new_rhs.append(rhs[-1])
         return new_bounds, tuple(new_rhs)
-
 
     def choose_attribute_idx(self) -> int:
         """Choose randomly index i,
@@ -268,15 +270,15 @@ class ProductionRule:
         if not attribute_idx:
             attribute_idx = self.choose_attribute_idx()
         if self.split_direction == "horizontal":
-            new_segments, new_rhs = self.__clean_area_division(self.__divide_area(
-                lower_bound=box.up,
-                higher_bound=box.down,
-                attribute=self.attributes[attribute_idx],
-            ),
-                self.rhs
+            new_segments, new_rhs = self.__clean_area_division(
+                self.__divide_area(
+                    lower_bound=box.up,
+                    higher_bound=box.down,
+                    attribute=self.attributes[attribute_idx],
+                ),
+                self.rhs,
             )
-            for (segment_up, segment_down), symbol_id in zip(
-                new_segments, new_rhs):
+            for (segment_up, segment_down), symbol_id in zip(new_segments, new_rhs):
                 boxes.append(
                     ImgBox(
                         left=box.left,
@@ -288,12 +290,14 @@ class ProductionRule:
                     )
                 )
         else:
-            new_segments, new_rhs = self.__clean_area_division(self.__divide_area(
-                lower_bound=box.left,
-                higher_bound=box.right,
-                attribute=self.attributes[attribute_idx],
-            ),
-            self.rhs)
+            new_segments, new_rhs = self.__clean_area_division(
+                self.__divide_area(
+                    lower_bound=box.left,
+                    higher_bound=box.right,
+                    attribute=self.attributes[attribute_idx],
+                ),
+                self.rhs,
+            )
             for (segment_left, segment_right), symbol_id in zip(new_segments, new_rhs):
                 boxes.append(
                     ImgBox(
@@ -526,6 +530,7 @@ class Grammar:
         self.nonterminals: dict[UUID, Nonterminal] = nonterminals
         self.terminals: dict[UUID, terminals] = terminals
         self.rules_df: pd.DataFrame = self.__obtain_rules_df(rules)
+        self.rules_graph: nx.DiGraph | None = None
 
     def __obtain_rules_df(
         self, rules: list[ProductionRule | StartProduction]
@@ -635,32 +640,66 @@ class Grammar:
         return Grammar(nonterminals=nonterminals, terminals=terminals, rules=rules)
 
     def get_all_rules_for_lhs(
-        self, lhs: UUID | str
-    ) -> tuple[list[ProductionRule | StartProduction], list[float]]:
+        self,
+        lhs: UUID | str,
+        rule_chooser: Callable[[ProductionRule], bool] = lambda x: True,
+    ) -> tuple[list[ProductionRule | StartProduction] | None, list[float] | None]:
         """Given ID of a nonterminal ('lhs'),
-        returns all rules from the grammar that are applicable
+        returns a subset of all rules from the grammar that are applicable
         to this nonterminal (i.e. their LHS is `lhs`)
         along with their probabilities
+
+        Args:
+            lhs: UUID of LHS nonterminal
+            rule_chooser: Callable, getting ProductionRule object as an argument
+                and returning `True` if the rule is accepted and `False` otherwise;
+                all rules are accepted by default
+
+        Returns:
+            tuple: (rules_for_lhs, rules_probs_for_lhs),
+                where rules_for_lhs is a list of all accepted rules with desired LHS
+                nad rules_probs_for_lhs are probabilities of these rules,
+                normalized so that they sum up to 1.0
+                if there's no rule satisfying condition, returns (`None`, `None`)
+
         """
         rules_df_for_lhs = self.rules_df[self.rules_df["lhs"] == lhs]
+        rules_df_for_lhs = rules_df_for_lhs[
+            rules_df_for_lhs["rules"].apply(rule_chooser)
+        ]
+        if rules_df_for_lhs.shape[0] == 0:
+            # no rules satisfying condition
+            return None, None
         rules_for_lhs = rules_df_for_lhs["rules"].tolist()
-        rules_probs_for_lhs = rules_df_for_lhs["rule_prob"].tolist()
+        rules_probs_for_lhs = rules_df_for_lhs["rule_prob"]
+        rules_probs_for_lhs = rules_probs_for_lhs / rules_probs_for_lhs.sum()
+        rules_probs_for_lhs = rules_probs_for_lhs.tolist()
         return rules_for_lhs, rules_probs_for_lhs
 
     def get_rule_for_lhs(
-        self, lhs: UUID | str
-    ) -> tuple[ProductionRule | StartProduction, float]:
+        self,
+        lhs: UUID | str,
+        rule_chooser: Callable[[ProductionRule], bool] = lambda x: True,
+    ) -> tuple[ProductionRule | StartProduction | None, float | None]:
         """Chooses a production rule from the grammar
         that is applicable to a nonterminal;
         the rule is chosen randomly, according to
         rules probabilities
         """
-        rules_for_lhs, rules_probs_for_lhs = self.get_all_rules_for_lhs(lhs)
+        rules_for_lhs, rules_probs_for_lhs = self.get_all_rules_for_lhs(
+            lhs, rule_chooser=rule_chooser
+        )
+        if not rules_for_lhs:
+            return None, None
         rng = np.random.default_rng()
         idx = rng.choice(len(rules_for_lhs), p=rules_probs_for_lhs)
         return rules_for_lhs[idx], rules_probs_for_lhs[idx]
 
-    def generate_parse_tree(self) -> ParseTree:
+    def generate_parse_tree(
+        self,
+        rules_choosers: dict[int, Callable[[ProductionRule], bool]] | None = None,
+        rebuild_rules_graph: bool = False,
+    ) -> ParseTree:
         """Performs production of the grammar
 
         Start shape is generated with one of the starting rules that are
@@ -672,8 +711,58 @@ class Grammar:
         Returns:
             ParseTree: result parse tree object
         """
-        # get start production and create ParseTree object
-        start_rule, start_rule_prob = self.get_rule_for_lhs("START")
+        if rules_choosers is None:
+            rules_choosers = dict()
+
+        if any(level > 1 for level in rules_choosers.keys()):
+            raise ValueError("Levels greater than 1 are currently not supported")
+
+        # build rules graph if necessary
+        if self.rules_graph is None or rebuild_rules_graph:
+            self.__build_rules_graph()
+
+        # get start production
+
+        # get all start productions that satisfy all rule choosers
+        if not rules_choosers:
+            start_rule, start_rule_prob = self.get_rule_for_lhs("START")
+            rules_choosers = dict()
+        else:
+            rel_start_prods_for_levels = []
+            for chooser_level, chooser_fun in rules_choosers.items():
+                relevant_start_productions_tuple = self.__relevant_start_productions(
+                    chooser_fun=chooser_fun, chooser_level=chooser_level
+                )
+                if relevant_start_productions_tuple is None:
+                    raise RuntimeError("No parse tree satisfying rule chooser")
+                rel_start_prods_for_levels.append(relevant_start_productions_tuple[0])
+            rel_start_prods = (
+                rel_start_prods_for_levels[0]
+                if len(rel_start_prods_for_levels) == 1
+                else list(
+                    set(rel_start_prods_for_levels[0]).intersection(
+                        *rel_start_prods_for_levels[1:]
+                    )
+                )
+            )
+            if not rel_start_prods:
+                raise RuntimeError("No parse tree satisfying all rule choosers")
+
+            # choose start production randomly
+            rel_start_prods_probs = [
+                self.rules_graph.nodes[rule]["rule_prob"] for rule in rel_start_prods
+            ]
+            probs_sum = sum(rel_start_prods_probs)
+            rel_start_prods_probs = [prob / probs_sum for prob in rel_start_prods_probs]
+            chosen_ind = np.random.choice(
+                len(rel_start_prods_probs), p=rel_start_prods_probs
+            )
+            start_rule, start_rule_prob = (
+                rel_start_prods[chosen_ind],
+                rel_start_prods_probs[chosen_ind],
+            )
+
+        # create ParseTree object
         parse_tree = ParseTree(
             start_production=start_rule, start_production_prob=start_rule_prob
         )
@@ -690,11 +779,21 @@ class Grammar:
                 rule, rule_prob, rule_attribute_idx = None, None, None
 
             else:
+                # get the level in tree in which node will be created
+                level = (
+                    parse_tree.level(parent_id) if parent_id is not None else -1
+                ) + 2
+
                 # get the symbol from the grammar
                 symbol = self.nonterminals[box.symbol_id]
 
                 # get the rule from the grammar and its attribute
-                rule, rule_prob = self.get_rule_for_lhs(box.symbol_id)
+                rule, rule_prob = self.get_rule_for_lhs(
+                    box.symbol_id,
+                    rule_chooser=rules_choosers.get(level, lambda x: True),
+                )
+                if rule is None:
+                    raise RuntimeError
                 rule_attribute_idx = (
                     rule.choose_attribute_idx() if rule.rule_type != "lexical" else None
                 )
@@ -757,6 +856,59 @@ class Grammar:
         new_nonterm = Nonterminal(reachable_labels=reachable_labels)
         nonterminals[new_nonterm_id] = new_nonterm
         return Grammar(terminals=self.terminals, nonterminals=nonterminals, rules=rules)
+
+    def __build_rules_graph(self) -> None:
+        """Builds graph of grammar's production rules
+
+        In the graph, nodes correspond to rules. An edge from node i to node j
+        exists if when in grammar production rule i is applied on a terminal N
+        and children nonterminals are obtained: N_1, N_2, ..., N_k,
+        it is possible that the rule j will be applied on one of childs
+        (i.e. rule j is applicable for at least one of nonterminals N_1, N_2, ..., N_k)
+        """
+        rules_graph = nx.DiGraph()
+
+        # create graph's nodes
+        for index, row in self.rules_df.iterrows():
+            rules_graph.add_node(
+                row.loc["rules"],
+                rule_prob=row.loc["rule_prob"],
+                is_start=(row.loc["rule_type"] == "start"),
+            )
+
+        # create graph's edges
+        for index, row in self.rules_df.iterrows():
+            if row.loc["rule_type"] == "lexical":
+                continue
+            for rhs_id in (
+                row.loc["rhs"]
+                if (row.loc["rule_type"] != "start")
+                else (row.loc["rhs"],)
+            ):
+                applicable_rules, applicable_rules_probs = self.get_all_rules_for_lhs(
+                    rhs_id
+                )
+                for rule, rule_prob in zip(applicable_rules, applicable_rules_probs):
+                    rules_graph.add_edge(row.loc["rules"], rule)
+
+        self.rules_graph = rules_graph
+
+    def __relevant_start_productions(
+        self, chooser_fun: Callable[[ProductionRule], bool], chooser_level: int
+    ) -> tuple[list[StartProduction], list[float]] | None:
+        if self.rules_graph is None:
+            raise AssertionError
+        rel_start_rules, rel_start_rules_probs = [], []
+        for start_rule, start_rule_prob in zip(*self.get_all_rules_for_lhs("START")):
+            k_distant_nodes = nx.descendants_at_distance(
+                self.rules_graph, start_rule, chooser_level
+            )
+            if any(chooser_fun(rule) for rule in k_distant_nodes):
+                rel_start_rules.append(start_rule)
+                rel_start_rules_probs.append(start_rule_prob)
+        if not rel_start_rules:
+            return None
+        return rel_start_rules, rel_start_rules_probs
 
 
 def merge_grammars(grammars: list[Grammar]) -> Grammar:
