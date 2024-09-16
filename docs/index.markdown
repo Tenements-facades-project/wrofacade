@@ -8,4 +8,12 @@
 This is the Wrofacade project's documentation. You can find here the project's description,
 used technology specification and more.
 
+### Contributors
+
+**Project's authors**:
+
+- Bianka Kowalska ([GitHub](https://github.com/Hubert1225))
+- Hubert Baran ([GitHub](https://github.com/bianekk))
+- Daniil Hardzetski ([GitHub](https://github.com/DanH4rd))
+
 link: [about]({{ site.baseurl }}{% link about.markdown %})
