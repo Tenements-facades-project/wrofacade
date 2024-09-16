@@ -12,8 +12,8 @@ used technology specification and more.
 
 **Project's authors**:
 
-- Bianka Kowalska ([GitHub](https://github.com/Hubert1225))
-- Hubert Baran ([GitHub](https://github.com/bianekk))
+- Bianka Kowalska ([GitHub](https://github.com/bianekk))
+- Hubert Baran ([GitHub](https://github.com/Hubert1225))
 - Daniil Hardzetski ([GitHub](https://github.com/DanH4rd))
 
 link: [about]({{ site.baseurl }}{% link about.markdown %})
