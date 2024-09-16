@@ -56,6 +56,13 @@ or the number of floors
 segmentation mask of a facade the user provides
 - **Generative Adversarial Networks (GANs)** - generative deep neural networks
 
+The project is implemented in Python.
+
+Unfortunately, not all project goals have been achieved. Having said this, authors believe
+that the system architecture they designed has a great potential.
+
+Learn more about used AI technologies [here]({{ site.baseurl }}{% link technologies.markdown %}).
+
 ### Contributors
 
 **Project's authors**:
