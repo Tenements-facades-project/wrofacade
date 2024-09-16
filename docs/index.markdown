@@ -3,6 +3,9 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 ---
-# title of the main page
+# Welcome to the Wrofacade's documentation!
+
+This is the Wrofacade project's documentation. You can find here the project's description,
+used technology specification and more.
 
 link: [about]({{ site.baseurl }}{% link about.markdown %})
