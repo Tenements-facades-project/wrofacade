@@ -3,7 +3,7 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 ---
-# Welcome to the Wrofacade's project!
+# Welcome to the Wrofacade project!
 
 This is the Wrofacade project's home page. You can find here the project's description,
 used technology specification and more.
