@@ -43,24 +43,31 @@ of both generative modules, there can be various implementations of them,
 making use of different technologies and providing different capabilities
 (e.g. support of different types of requirements passed by the user).
 
+Unfortunately, the concept has not been entirely implemented (e.g. style requirements
+are not supported at this moment).
+
 ### Technology and implementation
 
 Technologies that have been used:
 
 - **split grammars** - grammar-based models can generate new facades' images
-as well as new facade's segmentation masks; in such models, the generation process is more controllable
+as well as new facades' segmentation masks; in such models, the generation process is more controllable
 than in the case of deep generative models (like GANs) and the output shape is varying,
-so this type of models provides an option to set e.g. height to width ration of the output
+so using them carries a possibility of setting e.g. height to width ration of the output
 or the number of floors
 - **deep facades segmentation models** - such models enable a user to obtain an accurate
-segmentation mask of a facade the user provides
-- **Generative Adversarial Networks (GANs)** - generative deep neural networks
+segmentation mask of a facade the user provides; such a mask may be used further by a translation
+model to generate a new facade with layout similar to the facade provided by the user
+- **Generative Adversarial Networks (GANs)** - generative deep neural networks; these are
+black-box models, which behavior is hard to control or explain, but they provide extraordinary
+modelling capabilities and achieve incredible results even in the case of really complex pattern
+to learn
 
 The project is implemented in Python.
 
-Unfortunately, not all project goals have been achieved. Having said this, authors believe
-that the system architecture they designed has a great potential.
-
+As it was mentioned in the previous section, the implementation is not entirely complete
+at the moment. However, a framework is implemented, as well as a few of very useful
+technologies.
 Learn more about used AI technologies [here]({{ site.baseurl }}{% link technologies.md %}).
 
 ### Contributors
