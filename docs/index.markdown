@@ -36,7 +36,7 @@ Learn more on [about page]({{ site.baseurl }}{% link about.markdown %}).
 The concept of the pipeline of the facades generating system
 is presented below (diagram created with [miro](https://miro.com/app/dashboard/)).
 
-![pipeline-concept-diagram](img/Flowchart.jpg)
+![pipeline-concept-diagram](img/concept.jpg)
 
 It should be noted that the concept presented above is very general - in the case
 of both generative modules, there can be various implementations of them,
