@@ -43,8 +43,8 @@ of both generative modules, there can be various implementations of them,
 making use of different technologies and providing different capabilities
 (e.g. support of different types of requirements passed by the user).
 
-Unfortunately, the concept has not been entirely implemented (e.g. style requirements
-are not supported at this moment).
+Style requirements are not supported at this moment. They are planned to be
+introduced in the translation step.
 
 ### Technology and implementation
 
@@ -63,11 +63,8 @@ black-box models, which behavior is hard to control or explain, but they provide
 modelling capabilities and achieve incredible results even in the case of really complex pattern
 to learn
 
-The project is implemented in Python.
+The project is implemented in Python ([GitHub repository](https://github.com/Tenements-facades-project/wrofacade)).
 
-As it was mentioned in the previous section, the implementation is not entirely complete
-at the moment. However, a framework is implemented, as well as a few of very useful
-technologies.
 Learn more about used AI technologies [here]({{ site.baseurl }}{% link technologies.md %}).
 
 ### Contributors
