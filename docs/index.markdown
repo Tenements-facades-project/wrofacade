@@ -44,7 +44,7 @@ making use of different technologies and providing different capabilities
 (e.g. support of different types of requirements passed by the user).
 
 Style requirements are not supported at this moment. They are planned to be
-introduced in translation step.
+introduced in the translation step.
 
 ### Technology and implementation
 
