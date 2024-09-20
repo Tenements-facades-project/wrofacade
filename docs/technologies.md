@@ -7,6 +7,7 @@ Here You can learn about AI technologies used to generate facades with Wrofacade
 
 ## Split grammar learning
 
+The process of inducing a generative split grammar is inspired with [1],
 In this approach, we assume that structure of a facade can be modelled with
 a formal grammar.
 
@@ -61,7 +62,8 @@ and merged into _one nonterminal_, such that the grammar has lower number of non
 
 To create a rectangular lattice for a facade, the facade's segmentation mask is used.
 A set of horizontal and vertical split lines is obtained by finding pixel coordinates
-where there is the biggest number of changes of pixels' classes in the segmentation mask.
+where there is the biggest number of changes of pixels' classes in the segmentation mask
+(this idea is based on [2]).
 After that, DBSCAN clustering is applied on split lines' coordinates to remove redundant
 lines (_denoising_ of split lines).
 
@@ -94,4 +96,18 @@ The nonterminals merging procedure is as follows:
 
 How to calculate the likelihood of a grammar on a set of input facades' images? The likelihood of an input
 example is the sum of probabilities of all parse trees that produce the example and can be produced with
-the grammar (technically, we use logarithms and calculate the loglikelihood).
+the grammar (technically, we use logarithms and calculate the loglikelihood). All parse trees of a facade
+that a grammar can produces are obtained with 2D Earley Parser (introduced by [3]).
+
+### References
+
+[1] Martinovic, Andelo, and Luc Van Gool. "Bayesian grammar learning for inverse procedural modeling."
+Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2013.
+https://openaccess.thecvf.com/content_cvpr_2013/html/Martinovic_Bayesian_Grammar_Learning_2013_CVPR_paper.html
+
+[2] Riemenschneider, Hayko, et al. "Irregular lattices for complex shape grammar facade parsing."
+2012 IEEE conference on computer vision and pattern recognition. IEEE, 2012.
+
+[3] Martinovic, Andelo, and Luc Van Gool. Earley parsing for 2D stochastic context free grammars.
+Technical Report KUL/ESAT/PSI/1301, KU Leuven, 2013. 4, 2013.
+https://lirias.kuleuven.be/retrieve/224195
