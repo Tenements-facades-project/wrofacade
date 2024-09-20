@@ -55,4 +55,43 @@ and produces just one input example.
 input examples with equal probabilities).
 5. Iteratively perform _nonterminals merging_ - in this process, two nonterminals are chosen
 and merged into _one nonterminal_, such that the grammar has lower number of nonterminals
-(is "more stochastic) with possibly high grammar's likelihood on input examples.
+(is "more stochastic") with possibly high grammar's likelihood on input examples.
+
+### Lattices creation
+
+To create a rectangular lattice for a facade, the facade's segmentation mask is used.
+A set of horizontal and vertical split lines is obtained by finding pixel coordinates
+where there is the biggest number of changes of pixels' classes in the segmentation mask.
+After that, DBSCAN clustering is applied on split lines' coordinates to remove redundant
+lines (_denoising_ of split lines).
+
+### Obtaining parse trees with general grammar
+
+For each lattice, general grammar is used to create a parse tree. A parse tree should
+break down a facade in a logical way (i.e. facade into floors, then floors into cells with windows
+etc.). This is achieved by identifying windows in the image with utilization of the
+segmentation mask.
+
+### Obtaining merged grammar
+
+Once parse trees of examples are created, they are conversed into instance-specific grammars.
+Then, all instance-sepcific grammars are merged into one stochastic grammar, the only stochastic
+production of which is the choice of an input example to generate. The merged grammar genereates
+input facades, and probability of generating each facade is 1/_N_, where _N_ is the number of
+input facades examples.
+
+### Nonterminals merging
+
+The nonterminals merging procedure is as follows:
+
+1. Repeat:
+2.     choose a random nonterminal _X_
+3.     choose randomly a set of other nonterminals _S_ that are similar to _X_
+4.     for each nonterminal _Y_ from _S_
+5.         create new grammar, with merged _X_ and _Y_
+6.         calculate likelihood of the new grammar on input facades
+7.     replace grammar with a new grammar, with merged _X_ and the nonterminal from _S_ with the greatest likelihood
+
+How to calculate the likelihood of a grammar on a set of input facades' images? The likelihood of an input
+example is the sum of probabilities of all parse trees that produce the example and can be produced with
+the grammar (technically, we use logarithms and calculate the loglikelihood).
