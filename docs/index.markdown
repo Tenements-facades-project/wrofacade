@@ -65,7 +65,7 @@ to learn
 
 The project is implemented in Python ([GitHub repository](https://github.com/Tenements-facades-project/wrofacade)).
 
-Learn more about used AI technologies [here]({{ site.baseurl }}{% link technologies.md %}).
+Learn more about used AI technologies on the [technologies specification]({{ site.baseurl }}{% link technologies.md %}) page.
 
 ### Contributors
 
