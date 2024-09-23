@@ -32,13 +32,13 @@ rule is chosen in a production to split it and to produce further nonterminals o
 terminals). Additionally, such a grammar is a _generative model_, that may be used
 to generate facade's images examples.
 
-The idea is given a set of facades' images, to build a stochastic grammar, which
+Given a set of facades' images, the idea is to build a stochastic grammar in which
 terminals and nonterminals are derived from the input examples, but the grammar
 is able to generate new facades examples using them.
 
 ### Grammar learning process
 
-The input of the process is a set of facades examples, where each example
+The input to the process is a set of facades examples, where each example
 is a pair of images: (_I_, _M_); _I_ is a RGB image of a facade, and
 _M_ is the segmentation mask of the facade.
 
@@ -55,8 +55,8 @@ and produces just one input example.
 4. Merge all instance-specific grammars into one grammar (which just produces
 input examples with equal probabilities).
 5. Iteratively perform _nonterminals merging_ - in this process, two nonterminals are chosen
-and merged into _one nonterminal_, such that the grammar has lower number of nonterminals
-(is "more stochastic") with possibly high grammar's likelihood on input examples.
+and merged into _one nonterminal_, such that the grammar has a lower number of nonterminals
+(is "more stochastic") with as high likelihood on input examples as possible.
 
 ### Lattices creation
 
