@@ -58,6 +58,8 @@ input examples with equal probabilities).
 and merged into _one nonterminal_, such that the grammar has a lower number of nonterminals
 (is "more stochastic") with as high likelihood on input examples as possible.
 
+![grammars_part_1](img/grammars_1.png)
+
 ### Lattices creation
 
 To create a rectangular lattice for a facade, the facade's segmentation mask is used.
