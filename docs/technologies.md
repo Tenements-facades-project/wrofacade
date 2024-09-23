@@ -59,6 +59,10 @@ and merged into _one nonterminal_, such that the grammar has a lower number of n
 (is "more stochastic") with as high likelihood on input examples as possible.
 
 ![grammars_part_1](img/grammars_1.png)
+_Grammar learning pipeline - part 1_
+
+![grammars_part_2](img/grammars_2.png)
+_Grammar learning pipeline - part 2_
 
 ### Lattices creation
 
