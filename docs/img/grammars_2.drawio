@@ -1,0 +1,75 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0" version="24.7.16">
+  <diagram name="Strona-1" id="a1OaKGTlGuZEPxhQifRA">
+    <mxGraphModel dx="1194" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-1" value="&lt;font style=&quot;font-size: 48px;&quot; face=&quot;Times New Roman&quot;&gt;G&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-2" value="&lt;font style=&quot;font-size: 24px;&quot; face=&quot;Times New Roman&quot;&gt;i&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="216.72" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-3" value="&lt;font style=&quot;font-size: 48px;&quot; face=&quot;Times New Roman&quot;&gt;G&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="280" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-4" value="&lt;font style=&quot;font-size: 24px;&quot; face=&quot;Times New Roman&quot;&gt;i&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="296.72" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-8" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="111" y="380" as="sourcePoint" />
+            <mxPoint x="111" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-10" value="&lt;div&gt;INSTANCE-SPECIFIC&lt;/div&gt;&lt;div&gt;GRAMMARS&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="60" y="490" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-11" value="&lt;div&gt;MERGED&lt;/div&gt;&lt;div&gt;GRAMMAR&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="260" y="490" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-12" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="eTOA6T4pMlr5Udd_TaX9-10" target="eTOA6T4pMlr5Udd_TaX9-11">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="410" y="610" as="sourcePoint" />
+            <mxPoint x="460" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-13" value="simple grammars merging" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="190" y="540" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-14" value="&lt;font style=&quot;font-size: 48px;&quot; face=&quot;Times New Roman&quot;&gt;G&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="410" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-15" value="&lt;font style=&quot;font-size: 24px;&quot; face=&quot;Times New Roman&quot;&gt;i&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="426.72" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-18" value="&lt;b&gt;&lt;font style=&quot;font-size: 48px;&quot; face=&quot;Times New Roman&quot;&gt;G&lt;/font&gt;&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="280" y="340" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-20" value="&lt;div&gt;GENERATIVE&lt;br&gt;&lt;/div&gt;&lt;div&gt;STOCHASTIC&lt;/div&gt;&lt;div&gt;GRAMMAR&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="460" y="490" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-21" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="eTOA6T4pMlr5Udd_TaX9-20">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="520" as="sourcePoint" />
+            <mxPoint x="660" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-22" value="&lt;div&gt;nonterminals&lt;/div&gt;&lt;div&gt;merging&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="390" y="540" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-24" value="&lt;b&gt;&lt;font style=&quot;font-size: 48px;&quot; face=&quot;Times New Roman&quot;&gt;G&lt;/font&gt;&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="480" y="340" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-25" value="&lt;font style=&quot;font-size: 24px;&quot; face=&quot;Times New Roman&quot;&gt;&lt;b&gt;gen&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="510" y="360" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eTOA6T4pMlr5Udd_TaX9-28" value="" style="swimlane;startSize=0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="34" y="170" width="760" height="450" as="geometry">
+            <mxRectangle x="20" y="20" width="50" height="40" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
