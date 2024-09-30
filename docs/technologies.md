@@ -105,6 +105,10 @@ example is the sum of probabilities of all parse trees that produce the example 
 the grammar (technically, we use logarithms and calculate the loglikelihood). All parse trees of a facade
 that a grammar can produces are obtained with 2D Earley Parser (introduced by [3]).
 
+## Image translation
+
+A generated segmentation mask of a facade is translated to a realistic picture using the Pix2Pix model described in detail in [4]. The model consists of two neural networks: a generator, whose task is to generate new images, and a discriminator, which classifies whether the generated image is real or fake. The generator learns the underlying connections between images from the two domains (segmentation masks and façade images), and the discriminator examines each fragment of the generated picture and attempts to classify the patch as authentic or artificial.
+
 ### References
 
 [1] Martinovic, Andelo, and Luc Van Gool. "Bayesian grammar learning for inverse procedural modeling."
@@ -117,3 +121,6 @@ https://openaccess.thecvf.com/content_cvpr_2013/html/Martinovic_Bayesian_Grammar
 [3] Martinovic, Andelo, and Luc Van Gool. Earley parsing for 2D stochastic context free grammars.
 Technical Report KUL/ESAT/PSI/1301, KU Leuven, 2013. 4, 2013.
 https://lirias.kuleuven.be/retrieve/224195
+
+[4] Isola, Phillip, Jun-Yan Zhu, Tinghui Zhou, and Alexei A. Efros. 2016. “Image-to-Image Translation with Conditional Adversarial Networks.” 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Honolulu, HI, USA, 2017, pp. 5967-5976, https://doi.org/10.1109/CVPR.2017.632
+
