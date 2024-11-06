@@ -1,3 +1,8 @@
+"""
+Code based on original Pix2Pix paper
+Source repo available via https://github.com/phillipi/pix2pix
+"""
+
 import argparse
 import os
 from collections import OrderedDict
