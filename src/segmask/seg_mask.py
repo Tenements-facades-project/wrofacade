@@ -10,8 +10,6 @@ class SegMaskGenerator(ABC):
     Note that mask generation can be parametrized,
     and a parameter can be e.g. a facade image.
     """
-    def __init__(self) -> None:
-        pass
 
     @abstractmethod
     def generate_mask(self, args: dict):
