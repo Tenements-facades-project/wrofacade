@@ -6,5 +6,9 @@ class FacadeGenerator(ABC):
     """
 
     @abstractmethod
-    def generate_facade(self, *args, **kwargs):
+    def generate_facade(self, params: dict = None):
+        """
+        Args:
+            params -- dict containing parameters values for generating
+        """
         pass
