@@ -3,19 +3,11 @@ Code based on original Pix2Pix paper
 Source repo available via https://github.com/phillipi/pix2pix
 """
 
-import argparse
-import os
-from collections import OrderedDict
-import torch
-
 from src.utils.imgtrans_utils import networks
 from src.utils.imgtrans_utils.image_processing import img_to_tensor, tensor_to_img
 from .img_translator import ImageTranslator
 from src.utils.segmentation_mask import SegmentationMask
-import matplotlib.pyplot as plt
-from PIL import Image
 
-# from image_processing import img_to_tensor, tensor_to_img
 
 class Pix2PixModel(ImageTranslator):
     """ This class implements the pix2pix model, for learning a mapping from input images to output images given paired data.

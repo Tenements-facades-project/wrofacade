@@ -1,6 +1,6 @@
 from PIL import Image
 import numpy as np
-from collections import Counter
+
 
 class SegmentationMask:
     """Class containing segmentation mask and class info
