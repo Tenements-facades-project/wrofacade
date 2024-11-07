@@ -1,3 +1,8 @@
+"""This scripts loads several stochastic grammars
+from files, merges them into one grammar and then trains
+it using provided images and their segmentation masks
+"""
+
 import argparse
 import os
 import pickle
