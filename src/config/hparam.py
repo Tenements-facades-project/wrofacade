@@ -1,12 +1,12 @@
-import yaml
-
 """Usage of the parameters:
 In your file, insert the line:
 from config.hparam import hparam as hp
 
-Then access values using dot notation, e.g. device = hp.device 
-Example with nested values: gan_mode =  hp.translator.gan_mode 
+Then access values using dot notation, e.g. device = hp.device
+Example with nested values: gan_mode =  hp.translator.gan_mode
 """
+
+import yaml
 
 def load_hparam(filename:str) -> dict:
     """Function to load the config.yaml file and its parameters
