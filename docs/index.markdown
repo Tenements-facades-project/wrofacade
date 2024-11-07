@@ -67,6 +67,20 @@ The project is implemented in Python ([GitHub repository](https://github.com/Ten
 
 Learn more about used AI technologies on the [technologies specification]({{ site.baseurl }}{% link technologies.md %}) page.
 
+### Custom dataset
+
+The project utilized custom dataset of historic facade's images
+and their segmentation masks - _NeoFacade_. It is comprised of
+photos of historic facades in Wrocław, which have been taken
+by students of Architecture at Wrocław University of Science and
+Technology, and segmentation masks, which have been prepared
+by our annotators, under supervision of our domain experts.
+
+Two scientific papers related to the _NeoFacade_ dataset and its
+possible applications in machine learning will soon appear in the
+[Architectus](https://architectus.pwr.edu.pl/) journal. The dataset
+is planned to be published in the future.
+
 ### Contributors
 
 **Project's authors**:
@@ -75,3 +89,17 @@ Learn more about used AI technologies on the [technologies specification]({{ sit
 - Hubert Baran ([GitHub](https://github.com/Hubert1225))
 - Daniil Hardzetski ([GitHub](https://github.com/DanH4rd))
 
+**Scientific supervision**
+
+- prof. dr hab. inż. Halina Kwaśnicka
+
+**Domain experts**
+
+- dr inż. arch. Aleksandra Marcinów
+- dr Maria Legut-Pintal
+- dr inż. Bartłomiej Ćmielewski
+- dr inż. arch. Aleksandra Brzozowska - Jawornicka
+- dr Roland Mruczek
+- Małgorzata Biegańska
+- Katarzyna Blicharz
+- Agnieszka Pałka
