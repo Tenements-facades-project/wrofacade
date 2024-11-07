@@ -1,3 +1,4 @@
+import argparse
 import os
 import pickle
 import numpy as np
@@ -13,41 +14,34 @@ from src.utils.grammars_utils.training_utils import (
 from src.utils.dataset_metadata import SEGFACADEDataset
 
 
-input_grammars_paths = [
-    "checkpoints_1/checkpoint_100.pickle",
-    "checkpoints_2/checkpoint_100.pickle",
-    "checkpoints_3/checkpoint_100.pickle",
-]
+parser = argparse.ArgumentParser()
+parser.add_argument("imgs_dir")
+parser.add_argument("masks_dir")
+parser.add_argument("input_grammars_dir")
+parser.add_argument("output_dir")
+parser.add_argument("--window_labels", nargs="*", type=int, required=True)
+parser.add_argument("--output_pickle_name", default="grammar.pickle")
+parser.add_argument("--checkpoints_dir", default="checkpoints")
+parser.add_argument("--checkpoint_every_n", type=int, default=100)
+parser.add_argument("--downsampling_factor", default=0.17, type=float)
+parser.add_argument("--background_label", default=0, type=int)
+parser.add_argument("--n_random_draws", type=int, default=100)
+parser.add_argument("--n_epochs", type=int, default=500)
 
-imgs_dirs = [
-    "input_data/input_1/b",
-    "input_data/input_2/b",
-    "input_data/input_3/b",
-]
-
-masks_dirs = [
-    "input_data/input_1/a",
-    "input_data/input_2/a",
-    "input_data/input_3/a",
-]
-
-window_labels = [2, 4]
-background_label = 0
-downsampling_factor = 0.17
+args = parser.parse_args()
 
 
 if __name__ == "__main__":
 
     # load images and masks
     facades: list[tuple[np.ndarray, np.ndarray]] = []
-    for imgs_dir, masks_dir in zip(imgs_dirs, masks_dirs):
-        facades_names = [os.path.splitext(fname)[0] for fname in os.listdir(imgs_dir)]
-        facades += [
-            load_facade_and_mask(
-                facade_name=facade_name, imgs_dir=imgs_dir, masks_dir=masks_dir
-            )
-            for facade_name in tqdm(facades_names)
-        ]
+    facades_names = [os.path.splitext(fname)[0] for fname in os.listdir(args.imgs_dir)]
+    facades += [
+        load_facade_and_mask(
+            facade_name=facade_name, imgs_dir=args.imgs_dir, masks_dir=args.masks_dir
+        )
+        for facade_name in tqdm(facades_names)
+    ]
     print(f"Loaded f{len(facades)} facades")
 
     # downsample facade's images and masks
@@ -56,7 +50,7 @@ if __name__ == "__main__":
     downsampled_facades: list[tuple[np.ndarray, np.ndarray]] = []
     for img, mask in tqdm(facades):
         downsampled_facades.append(
-            resize_facade(img, mask, resizing_factor=downsampling_factor)
+            resize_facade(img, mask, resizing_factor=args.downsampling_factor)
         )
 
     # convert masks images to labels
@@ -87,7 +81,7 @@ if __name__ == "__main__":
     lattices = [
         crop_facade(
             lattice=lattice,
-            background_label=background_label,
+            background_label=args.background_label,
         )
         for lattice in lattices
     ]
@@ -112,7 +106,7 @@ if __name__ == "__main__":
     # load input grammars
     print("Input grammars loading")
     input_grammars = []
-    for path in tqdm(input_grammars_paths):
+    for path in tqdm(os.listdir(args.input_grammars_dir)):
         with open(path, "rb") as f:
             input_grammars.append(pickle.load(f))
 
