@@ -111,7 +111,8 @@ if __name__ == "__main__":
     # load input grammars
     print("Input grammars loading")
     input_grammars = []
-    for path in tqdm(os.listdir(args.input_grammars_dir)):
+    for file_name in tqdm(os.listdir(args.input_grammars_dir)):
+        path = os.path.join(args.input_grammars_dir, file_name)
         with open(path, "rb") as f:
             input_grammars.append(pickle.load(f))
 
