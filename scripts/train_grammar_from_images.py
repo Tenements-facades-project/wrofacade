@@ -1,3 +1,8 @@
+"""This script loads a set of images and their
+segmentation masks and trains a stochastic generative
+grammar from them
+"""
+
 import argparse
 import os
 import pickle
