@@ -22,6 +22,7 @@ title: wrofacade
 email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
   This is the wrofacade project's home page - historic facades generation with AI.
+logo: /img/nadodrze_cybulskiego_24.png
 baseurl: "/wrofacade" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jekyllrb
