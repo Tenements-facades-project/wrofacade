@@ -1,3 +1,8 @@
+"""
+Code based on original Pix2Pix paper
+Source repo available via https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix
+"""
+
 import random
 import torchvision.transforms as transforms
 import torch

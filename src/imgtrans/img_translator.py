@@ -1,3 +1,8 @@
+"""
+Code based on original Pix2Pix paper
+Source repo available via https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix
+"""
+
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 import torch

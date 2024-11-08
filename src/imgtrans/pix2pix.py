@@ -1,6 +1,6 @@
 """
 Code based on original Pix2Pix paper
-Source repo available via https://github.com/phillipi/pix2pix
+Source repo available via https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix
 """
 
 from src.utils.imgtrans_utils import networks
