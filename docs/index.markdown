@@ -69,7 +69,7 @@ Learn more about used AI technologies on the [technologies specification]({{ sit
 
 ### Custom dataset
 
-The project utilized custom dataset of historic facade's images
+The project utilized a custom dataset of historic facade's images
 and their segmentation masks - _NeoFacade_. It is comprised of
 photos of historic facades in Wrocław, which have been taken
 by students of Architecture at Wrocław University of Science and
