@@ -101,5 +101,6 @@ is planned to be published in the future.
 - dr inż. arch. Aleksandra Brzozowska - Jawornicka
 - dr Roland Mruczek
 - Małgorzata Biegańska
+- Julia Michalik
 - Katarzyna Blicharz
 - Agnieszka Pałka
