@@ -5,7 +5,7 @@
 
 ### Grammar + Pix2Pix
 
-Here are same examples of generated images using pipeline, in which
+Here are some examples of generated images using pipeline, in which
 generative grammar generates a segmentation mask and Pix2Pix transaltes
 it to a new image.
 
