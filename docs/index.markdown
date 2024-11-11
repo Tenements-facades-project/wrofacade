@@ -81,6 +81,11 @@ possible applications in machine learning will soon appear in the
 [Architectus](https://architectus.pwr.edu.pl/) journal. The dataset
 is planned to be published in the future.
 
+### See the results
+
+Exemplary images generated with various pipeline types can be seen
+[one the results page]({{ site.baseurl }}{% link results.md %}).
+
 ### Contributors
 
 **Project's authors**:
