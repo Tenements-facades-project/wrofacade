@@ -52,3 +52,7 @@ segmentator:
 grammars_masks:
   grammar_pickle_path: "checkpoints_final/checkpoint_10.pickle"
   n_attempts: 20
+
+---
+grammars_pure:
+  grammar_pickle_path: "checkpoints_final/checkpoint_10.pickle"
