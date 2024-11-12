@@ -37,3 +37,43 @@ or a segmentation model that accepts a facade image (class `src.segmask.transfor
 This project provides also an additional option, which is generating images using
 just grammars. This pipeline is implemented by the class
 `src.facade_generator.pure_grammars_generator.PureGrammarGenerator`.
+
+## Project structure
+
+```
+wrofacade
+├── docs
+├── notebooks
+│   ├── 1-generated-images-examples.ipynb
+│   └── 2-useful-utilities.ipynb
+├── README.md
+├── requirements.txt
+├── scripts
+│   ├── train_grammar_from_grammars.py
+│   └── train_grammar_from_images.py
+├── src
+│   ├── config
+│   ├── facade_generator
+│   ├── imgtrans
+│   ├── segmask
+│   ├── utils
+│   └── visualize
+```
+
+- All source code necessary in the generation process is situated in the `src` directory.
+- In the `scripts` directory, there are scripts to prepare generation tools
+  (currently, there are only scripts to train a generative grammar)
+- `docs` contains website content and images used in this README
+- `notebooks` provides some Jupyter notebooks with examples of usage utilities from
+  this repository
+
+**Subdirectories of `src`**:
+
+- `config`: place when configuration is stored and the code to access it
+- `facade_generator`: fundamental logic of pipelines is defined here
+- `imgtrans`: image translators are implemented here
+- `segmask`: in this directory, one can find all models providing segmentation masks
+  of facades
+- `utils`: here is the implementation of utilities necessary to run pipelines
+  (e.g. grammar algorithms)
+- `visualize`: some utils for visualization
