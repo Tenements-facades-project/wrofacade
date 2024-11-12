@@ -170,3 +170,21 @@ PYTHONPATH=$(pwd) jupyter lab
 ```
 
 and navigate to the notebook you would like to run.
+
+## References
+
+[1] Martinovic, Andelo, and Luc Van Gool. "Bayesian grammar learning for inverse procedural modeling."
+Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2013.
+https://openaccess.thecvf.com/content_cvpr_2013/html/Martinovic_Bayesian_Grammar_Learning_2013_CVPR_paper.html
+
+[2] Riemenschneider, Hayko, et al. "Irregular lattices for complex shape grammar facade parsing."
+2012 IEEE conference on computer vision and pattern recognition. IEEE, 2012.
+
+[3] Martinovic, Andelo, and Luc Van Gool. Earley parsing for 2D stochastic context free grammars.
+Technical Report KUL/ESAT/PSI/1301, KU Leuven, 2013. 4, 2013.
+https://lirias.kuleuven.be/retrieve/224195
+
+[4] Isola, Phillip, Jun-Yan Zhu, Tinghui Zhou, and Alexei A. Efros. 2016. “Image-to-Image Translation with Conditional Adversarial Networks.” 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Honolulu, HI, USA, 2017, pp. 5967-5976, https://doi.org/10.1109/CVPR.2017.632
+
+[5] [pix2pix repository](https://github.com/phillipi/pix2pix),
+[pytorch-CycleGAN-and-pix2pix repository](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)
