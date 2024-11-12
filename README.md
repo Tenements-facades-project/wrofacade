@@ -24,3 +24,16 @@ number of floors)
 ![pipeline-concept-diagram](docs/img/concept.jpg)
 
 Style requirements are not supported at this moment. They are planned to be introduced in the translation step.
+
+## Supported pipelines
+
+The primary pipeline developed in this project is (mask generator + mask to image translator).
+This pipeline is represented by the class `SegmentAndTranslate`
+(`src.facade_generator.pipeline.SegmentAndTranslate`). An object of this class contains
+two objects: a segmentation mask generator and a mask to image translator.
+Segmentation mask generator can be a grammar-based generator (class `src.segmask.grammars.GrammarMaskGenerator`)
+or a segmentation model that accepts a facade image (class `src.segmask.transformers_seg.TransSegmentationHF`).
+
+This project provides also an additional option, which is generating images using
+just grammars. This pipeline is implemented by the class
+`src.facade_generator.pure_grammars_generator.PureGrammarGenerator`.
