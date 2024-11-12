@@ -1,6 +1,9 @@
 # wrofacade
 
-This is the Wrofacade project's repository - historic facades generation with AI.
+This is the Wrofacade project's repository - Historic facades generation with AI, accepting user requirements.
+
+![generated image example 1](docs/img/example-grammar-pix2pix-1.png)
+![generated image example 2](docs/img/example-grammar-pix2pix-3.png)
 
 ---
 
