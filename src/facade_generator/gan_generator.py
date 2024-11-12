@@ -8,4 +8,4 @@ class GANGenerator(FacadeGenerator):
     def load_model():
         pass
     def generate_facade(self):
-        
+        pass
