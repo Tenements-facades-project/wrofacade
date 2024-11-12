@@ -15,8 +15,7 @@ class PureGrammarGenerator(FacadeGenerator):
     """
 
     def __init__(
-        self,
-        grammar_pickle_path: str = hparam["grammars_pure"]["grammar_pickle_path"]
+        self, grammar_pickle_path: str = hparam["grammars_pure"]["grammar_pickle_path"]
     ):
         self.__load_grammar_from_file(grammar_pickle_path)
 
