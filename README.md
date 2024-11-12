@@ -77,3 +77,96 @@ wrofacade
 - `utils`: here is the implementation of utilities necessary to run pipelines
   (e.g. grammar algorithms)
 - `visualize`: some utils for visualization
+
+## How to run
+
+The procedure of running code from this repository is a little bit complex and depends
+on the pipeline you would like to use, because you will have to obtain all necessary
+models. First, the procedures of obtaining components of pipeline are presented.
+You do not have to follow all the procedures, but just these providing components of
+your pipeline. For example, if you want to use `SegmentAndTranslate` with grammars,
+you just need have Pix2Pix model trained and generative grammar built.
+
+#### Set up environment
+
+Navigate to the project's root directory, and install packages:
+
+```commandline
+pip install -r requirements.txt
+```
+
+#### Inducing (building) generative grammar
+
+You will need some facades dataset (images and segmentation masks).
+Build two empty directories and place facades images in one directory and facades
+mask in the other. A facade's image and its mask files should have the same name
+(for example, if images are stored in `imgs/` and masks in `masks/`, then if a facade's
+image path is `imgs/facade_x.png`, then its mask should be `masks/facade/x.png`).
+
+Run script inducing a generative grammar from images and masks:
+
+```bash
+PYTHONPATH=$(pwd) python3 scripts/train_grammar_from_images.py \
+  <imgs_dir> <masks_dir> <output_dir> \
+  --window_labels <labels> --background_label <label> --n_epochs <number_of_epochs>
+```
+
+for example:
+
+```bash
+PYTHONPATH=$(pwd) python3 scripts/train_grammar_from_images.py \
+  imgs masks output \
+  --window_labels 2 4 --background_label 0 --n_epochs 200
+```
+
+This script results in saving pickled grammars:
+
+- every some number of epochs: checkpoint in checkpoints directory
+- after all epochs: final grammar
+
+Unfortunately, this implementation of grammars learning is not very fast, so training
+for large number of facades takes prohibitively long (we leave optimizing the implementation,
+e.g. utilizing Numba, for future work).
+
+You can train several grammars on different small sets of images and then merge
+them and train as one grammar for a few epochs. This can be done by running the script:
+
+```bash
+PYTHONPATH=$(pwd) python3 scripts/train_grammar_from_grammars.py \
+  <imgs_dir> <mask_dir> <input_grammars_dir> <output_dir> \
+  --window_labels <labels> --background_label <label> --n_epochs <number_of_epochs>
+```
+
+#### Segmentation model
+
+If you wish to use `TransSegmentationHF` class or write your own that derives segmentation
+mask from a given facade image, you will need a segmentation model. Unfortunately,
+the model we used is not publicly available. You will have to modify the `model_name_or_path`
+property in the `segmentator` part of config.yaml file (`src/config/config.yaml`) to
+the path to your model.
+
+#### Pix2Pix
+
+In order to train the Pix2Pix model, you can follow steps described in the
+[original repo](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix).
+You will need the state dict file: `"<epoch>_net_<name>.pth"`.
+
+#### Run a pipeline
+
+1. Open the configuration file: `src/config/config.yaml` and set correct paths to
+files with your models
+2. Run Python in such a way that it can import `src`, e.g.:
+
+```bash
+PYTHONPATH=$(pwd) python3
+```
+
+#### Run notebooks
+
+If you want to run examples in notebooks, just run:
+
+```bash
+PYTHONPATH=$(pwd) jupyter lab
+```
+
+and navigate to the notebook you would like to run.
