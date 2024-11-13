@@ -61,7 +61,7 @@ class PureGrammarGenerator(FacadeGenerator):
             rule_min_ratio = (
                 (
                     lambda rule: rule.start_shape[0] / rule.start_shape[1]
-                                 >= min_height_width_ratio
+                    >= min_height_width_ratio
                 )
                 if min_height_width_ratio
                 else lambda rule: True
@@ -69,7 +69,7 @@ class PureGrammarGenerator(FacadeGenerator):
             rule_max_ratio = (
                 (
                     lambda rule: rule.start_shape[0] / rule.start_shape[1]
-                                 <= max_height_width_ratio
+                    <= max_height_width_ratio
                 )
                 if max_height_width_ratio
                 else lambda rule: True
