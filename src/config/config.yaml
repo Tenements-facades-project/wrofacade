@@ -49,6 +49,13 @@ segmentator:
   local_files_only: False
 
 ---
+torchGAN:
+  checkpoint_path: 'checkpoints/stackGan/netG_56500.pth'
+  input_dim: 100
+  distribution: "normal"
+  device: 'cuda'
+
+---
 grammars_masks:
   grammar_pickle_path: "checkpoints_final/checkpoint_10.pickle"
   n_attempts: 20
