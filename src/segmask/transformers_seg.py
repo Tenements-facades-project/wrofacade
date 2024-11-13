@@ -5,7 +5,7 @@ from torchvision.transforms.functional import pil_to_tensor
 from PIL import Image
 import numpy as np
 from src.utils.segmentation_mask import SegmentationMask
-
+import json
 
 class TransSegmentationHF(SegMaskGenerator):
     """seg_mask module implementation using segmentation model
@@ -24,7 +24,7 @@ class TransSegmentationHF(SegMaskGenerator):
                             if not the model will be looked up on Hugging
                             Face platform
 
-                'label2clr':dict[str,list] -- dictionary containing class labels and colours, keys' positional index
+                'label2clr_path':str -- path to json file containing class labels and colours, keys' positional index
                             in the dict corresponds to the class id, e.g. {'window': [255,244,233]}
 
                 'local_files_only':boolean - boolean flag. If True the model wouldn't be looked
@@ -54,7 +54,10 @@ class TransSegmentationHF(SegMaskGenerator):
             local_files_only=hp["segmentator"]["local_files_only"],
         )
 
-        self.label2clr = hp["label2clr"]
+        
+        with open(hp["label2clr_path"]) as f:
+            self.label2clr: dict[str, list[int]] = json.load(f)
+            
 
     def generate_mask(self, args: dict) -> SegmentationMask:
         """Get a segmentation mask for the provided image.
