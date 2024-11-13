@@ -1,3 +1,5 @@
+# source repo : https://github.com/rightlit/StackGAN-v2-rev
+# original project repo : https://github.com/hanzhanggit/StackGAN-v2
 
 import torch
 import torch.nn as nn
