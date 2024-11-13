@@ -176,7 +176,7 @@ and navigate to the notebook you would like to run.
 - Code for inducing grammars is very slow; it can be improved by
 reimplementing the algorithm - using Numba or moving to a faster programming language
 - In the pipeline we built, the Pix2Pix model always returns square results
-- Due to the fact that our algorithm for parsing input facades is imperfect, model
+- Due to the fact that our algorithm for parsing input facades is imperfect, the grammar model
 makes mistakes in terms of number of floors of generated facade
 
 Any contribution is welcome!
