@@ -173,6 +173,7 @@ and navigate to the notebook you would like to run.
 
 ## Limitations and future work
 
+- Making the mask-to-image translator accept style requirements
 - Code for inducing grammars is very slow; it can be improved by
 reimplementing the algorithm - using Numba or moving to a faster programming language
 - In the pipeline we built, the Pix2Pix model always returns square results
