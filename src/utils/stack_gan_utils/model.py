@@ -1,7 +1,6 @@
 # source repo : https://github.com/rightlit/StackGAN-v2-rev
 # original project repo : https://github.com/hanzhanggit/StackGAN-v2
 
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,7 +9,7 @@ import torch.utils.model_zoo as model_zoo
 from torch.autograd import Variable
 from torchvision import models
 
-from GenerativeModelsData.StackGan2.StackGanUtils.config import cfg
+from src.utils.stack_gan_utils.config import cfg
 
 
 # ############################## For Compute inception score ##############################
