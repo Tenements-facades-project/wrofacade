@@ -1,20 +1,6 @@
 device: 'cpu' # [cpu | cuda | mps]
 label2clr_path: "label2clr.json"
 
----
-label2clr: 
-  noise: [  0]
-  door: [  110]
-  window: [  240]
-  portal: [  200]
-  window_casing: [  250]
-  pediment: [  230]
-  cornice/horizontal_element: [  80]
-  pilaster/vertical_element: [  60]
-  balcony: [  140]
-  roof: [  160]
-  detail: [  180]
-  wall: [  30]
 --- 
 translator:
   checkpoints_dir: 'checkpoints/pix2pix/' # models are stored here
