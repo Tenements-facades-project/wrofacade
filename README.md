@@ -46,6 +46,7 @@ wrofacade
 ├── notebooks
 │   ├── 1-generated-images-examples.ipynb
 │   └── 2-useful-utilities.ipynb
+├── label2clr.json
 ├── README.md
 ├── requirements.txt
 ├── scripts
@@ -66,6 +67,8 @@ wrofacade
 - `docs` contains website content and images used in this README
 - `notebooks` provides some Jupyter notebooks with examples of usage utilities from
   this repository
+- `label2clr.json` file contains mapping from class names to pixel labels used in
+segmentation masks
 
 **Subdirectories of `src`**:
 
@@ -155,11 +158,15 @@ You will need the state dict file: `"<epoch>_net_<name>.pth"`.
 
 1. Open the configuration file: `src/config/config.yaml` and set correct paths to
 files with your models
-2. Run Python in such a way that it can import `src`, e.g.:
+2. Modify `label2clr.json` so that it complies with your dataset
+3. Run Python in such a way that it can import `src`, e.g.:
 
 ```bash
 PYTHONPATH=$(pwd) python3
 ```
+
+Then, you can import utilities from `src`, create an object of a class that implements
+desired pipeline, and generate facade images.
 
 #### Run notebooks
 
