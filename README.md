@@ -44,7 +44,7 @@ just grammars (i.e., we use grammar not to generate segmentation mask but a read
 This pipeline is implemented by the class
 `src.facade_generator.pure_grammars_generator.PureGrammarGenerator`.
 - GANs - there is also a pipeline consisting of just one GAN network; it is implemented by
-the class `src.facade_generator.gan_generator.GANGeneratorTorch` (we used StackGAN in our experiments)
+the class `src.facade_generator.gan_generator.GANGeneratorTorch` (abstract GAN in PyTorch)
 
 ## Project structure
 
