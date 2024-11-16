@@ -43,8 +43,10 @@ This project provides also **additional pipelines**:
 just grammars (i.e., we use grammar not to generate segmentation mask but a ready facade image).
 This pipeline is implemented by the class
 `src.facade_generator.pure_grammars_generator.PureGrammarGenerator`.
-- GANs - there is also a pipeline consisting of just one GAN network; it is implemented by
-the class `src.facade_generator.gan_generator.GANGeneratorTorch` (abstract GAN in PyTorch)
+- GANs - there is also a pipeline block which allows to incorporate a torch GAN generator model into the pipeline.
+It is implemented in the class src.facade_generator.gan_generator.GANGeneratorTorch. It requires a torch module object
+with target architecture, a checkpoint file name and optionally two lambda function acting like decorators for input
+and output of the model that transform values to format the model and the pipeline expects them to be respectively.
 
 ## Project structure
 
