@@ -109,6 +109,36 @@ that a grammar can produces are obtained with 2D Earley Parser (introduced by [3
 
 A generated segmentation mask of a facade is translated to a realistic picture using the Pix2Pix model described in detail in [4]. The model consists of two neural networks: a generator, whose task is to generate new images, and a discriminator, which classifies whether the generated image is real or fake. The generator learns the underlying connections between images from the two domains (segmentation masks and façade images), and the discriminator examines each fragment of the generated picture and attempts to classify the patch as authentic or artificial.
 
+## Image segmentation
+
+The segmentation model of choice in this project is Segformer [5]. The key feature of this model is 
+the use of transformers, architecture that heavily impacted machine learning in the sphere of natural 
+language processing. 
+
+The transformer encoder of this model works with multi scale features, what allows this model
+to work with image data with a resolution different from the resolution of train data. The decoder is a 
+simple MLP model, whose task is to aggregate information from different layers provided by the decoder.
+
+To train our own Segformer for the task of image segmentation we used implementation avaliable at [6].
+We used a `nvidia/mit-b0` baseline for the encoder while training the decoder for the target labels ourselves using our data.
+
+An example of segmentation and a confusion matrix showing model accuracy for our dataset are presented below (confusion matrix values are shown in %). Additionally confusion matrices for publically avaliable
+CMP facade [7] and ParisArtDecoFacade datasets [8] are shown as references.
+
+![segmentation_1](img/segmentation_true.png)
+_Example image with real label from our dataset_
+
+![segmentation_2](img/segmentation_pred.png)
+_Example image with predicted label from our dataset_
+
+![segmentation_cmatrix1](img/confusion_matrix1.png)
+_Confusion matrix for segformer trained on our dataset_
+
+![segmentation_cmatrix2](img/confusion_matrix2.png)
+_Confusion matrix for segformer trained on CMP dataset_
+
+![segmentation_cmatrix3](img/confusion_matrix3.png)
+_Confusion matrix for segformer trained on ParisArtDecoFacade dataset_
 ### References
 
 [1] Martinovic, Andelo, and Luc Van Gool. "Bayesian grammar learning for inverse procedural modeling."
@@ -124,3 +154,8 @@ https://lirias.kuleuven.be/retrieve/224195
 
 [4] Isola, Phillip, Jun-Yan Zhu, Tinghui Zhou, and Alexei A. Efros. 2016. “Image-to-Image Translation with Conditional Adversarial Networks.” 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Honolulu, HI, USA, 2017, pp. 5967-5976, https://doi.org/10.1109/CVPR.2017.632
 
+[5]Enze Xie and Wenhai Wang and Zhiding Yu and Anima Anandkumar and Jos{\'{e}} M. {\'{A}}lvarez and Ping Luo. 2021. "SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers", 2105.15203, https://arxiv.org/abs/2105.15203
+
+[6] https://cmp.felk.cvut.cz/~tylecr1/facade/
+
+[8] https://github.com/raghudeep/ParisArtDecoFacadesDataset
