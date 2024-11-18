@@ -117,7 +117,7 @@ language processing.
 
 The transformer encoder of this model works with multi scale features, what allows this model
 to work with image data with a resolution different from the resolution of train data. The decoder is a 
-simple MLP model, whose task is to aggregate information from different layers provided by the decoder.
+simple MLP model, whose task is to aggregate information from different layers given by the decoder.
 
 To train our own Segformer for the task of image segmentation we used implementation avaliable at [6].
 We used a `nvidia/mit-b0` baseline for the encoder while training the decoder for the target labels ourselves using our data.
@@ -156,6 +156,8 @@ https://lirias.kuleuven.be/retrieve/224195
 
 [5]Enze Xie and Wenhai Wang and Zhiding Yu and Anima Anandkumar and Jos{\'{e}} M. {\'{A}}lvarez and Ping Luo. 2021. "SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers", 2105.15203, https://arxiv.org/abs/2105.15203
 
-[6] https://cmp.felk.cvut.cz/~tylecr1/facade/
+[6] https://github.com/Xpitfire/SSIW
+
+[7] https://cmp.felk.cvut.cz/~tylecr1/facade/
 
 [8] https://github.com/raghudeep/ParisArtDecoFacadesDataset
