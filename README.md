@@ -27,16 +27,26 @@ Style requirements are not supported at this moment. They are planned to be intr
 
 ## Supported pipelines
 
-The primary pipeline developed in this project is (mask generator + mask to image translator).
+This repository provides several pipelines for image generation. The choice of the pipeline
+depends on the needs of the user - different pipelines are capable of meeting different requirements.
+
+The **primary pipeline** developed in this project is (mask generator + mask to image translator).
 This pipeline is represented by the class `SegmentAndTranslate`
 (`src.facade_generator.pipeline.SegmentAndTranslate`). An object of this class contains
 two objects: a segmentation mask generator and a mask to image translator.
 Segmentation mask generator can be a grammar-based generator (class `src.segmask.grammars.GrammarMaskGenerator`)
 or a segmentation model that accepts a facade image (class `src.segmask.transformers_seg.TransSegmentationHF`).
 
-This project provides also an additional option, which is generating images using
-just grammars. This pipeline is implemented by the class
+This project provides also **additional pipelines**:
+
+- pure grammars - in this option, images are generated using
+just grammars (i.e., we use grammar not to generate segmentation mask but a ready facade image).
+This pipeline is implemented by the class
 `src.facade_generator.pure_grammars_generator.PureGrammarGenerator`.
+- GANs - there is also a pipeline block which allows to incorporate a torch GAN generator model into the pipeline.
+It is implemented in the class src.facade_generator.gan_generator.GANGeneratorTorch. It requires a torch module object
+with target architecture, a checkpoint file name and optionally two lambda function acting like decorators for input
+and output of the model that transform values to format the model and the pipeline expects them to be respectively.
 
 ## Project structure
 
